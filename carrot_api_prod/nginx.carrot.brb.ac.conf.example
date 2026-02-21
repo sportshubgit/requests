@@ -1,0 +1,36 @@
+server {
+    listen 80;
+    server_name carrot.brb.ac;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name carrot.brb.ac;
+
+    # Replace with your cert paths (Let's Encrypt shown as example)
+    ssl_certificate /etc/letsencrypt/live/carrot.brb.ac/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/carrot.brb.ac/privkey.pem;
+
+    root /var/www/carrot_api_prod;
+    index player_api.php index.php;
+
+    client_max_body_size 2m;
+
+    location / {
+        try_files $uri $uri/ /player_api.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+        fastcgi_read_timeout 60s;
+    }
+
+    # Prevent accidental source/config exposure
+    location ~* \.(md|log|sql|ini)$ {
+        deny all;
+    }
+}
+
