@@ -1,0 +1,251 @@
+# pack-refs with: peeled fully-peeled sorted 
+ecfa295f55e9d059eabc647510ef8e90c9bd517b refs/remotes/origin/0xsysr3ll/feat/media-server-migration
+fd33336a3936e1792d020a69a8681ec36c3befae refs/remotes/origin/0xsysr3ll/feat/override-user-request-limit
+b46a7d8804fef80510e25fd802ddf8501bdfe04c refs/remotes/origin/0xsysr3ll/feat/plex-4k-debug-logs
+3070ba74aeefd28f082859bc68f53896c8d721db refs/remotes/origin/0xsysr3ll/feat/webhook-custom-headers
+d57af7334c9aaaf98c41ef1bbf947e66c7a929b1 refs/remotes/origin/0xsysr3ll/fix/failed-request-status
+eb08eb024f73d01b5abca68481fb9cab422f2c3a refs/remotes/origin/0xsysr3ll/fix/plex-recently-added
+e6a2f360cd7f780927143f40aae5e6df5968f28d refs/remotes/origin/OwsleyJr/chore/readme
+4ccc956c35ac21eda3052d1f2efc7d2d11490841 refs/remotes/origin/README-update
+503c099cd1e395665d14c115b38c792c789dc18c refs/remotes/origin/advanced-override-rules
+c7ba5532089dc0d9a1c861ebf54b2858f154285b refs/remotes/origin/change-to-self-hosted-workflow
+efb0269439744ea91fe6bc02cf92c9f4c95b7d75 refs/remotes/origin/ci-arm64-support-fix
+f3e8cc3546c823e7d4e811b9d2fbc1d750a7a274 refs/remotes/origin/ci-merged-manifest-images
+68f56d2035d05827d47ffd9a4e374b19043146b5 refs/remotes/origin/develop
+99c06f115807e0899702936e33154f8ac80412a1 refs/remotes/origin/discord-notif-logs
+959a40ff202c55e7b3e7fe7c9c754cb1774bb06a refs/remotes/origin/fallenbagel/docs-rename-using-jellyseerr-advance-path
+f02755f03d454914bdccb618541b232716241cad refs/remotes/origin/fallenbagel/feat-jellyfin-quick-connect
+979b1feaa41c0971419eef07e7a43007554ce4c3 refs/remotes/origin/fallenbagel/feat-monitor-new-items
+b92a26bfcb9fd08dcb5303e07a3417c9bb8ef137 refs/remotes/origin/fallenbagel/feat/ntfy-priority
+1a4b8c156397d991e6a600bcc9379fbdabb1fbcb refs/remotes/origin/fallenbagel/feat/routing-rules
+8fa68da4814629ed7cedd52c85faf3a44b40975e refs/remotes/origin/fallenbagel/fix/jellyfin-4k-detection
+a87914abc667625ce836c73c60c0d6d6d240b63b refs/remotes/origin/fallenbagel/fix/sonarr-scanner-metadata-provider
+861911530a6e96547903740dd5114197c29e136f refs/remotes/origin/feat-anime-seriesType
+77e28484aef4a5ed0661a4c1432df06e268322b9 refs/remotes/origin/feat-dns-caching
+2786424f7069d812ea9fa836c6ab864ab0f4b627 refs/remotes/origin/feat-experimental-basepath
+4377667b8fafb31653773be4afab2852248ca424 refs/remotes/origin/feat-jellyfin/emby-servername-store
+9e8000527e42a63a821f6cfd8b1fee91f1a84c35 refs/remotes/origin/feat-makeover
+c40d59573ab6d30d38b8b330406491c84c6e7d24 refs/remotes/origin/feat-media-availability-sync-emby/jellyfin-support
+dd2c752cf7b6ec0dd5f9de82586d4fa738aa6576 refs/remotes/origin/feat-server-type-setup
+3bf04f2abd96bf95a1363dd16e4de46cf621ab5d refs/remotes/origin/fix-4k-detection-series
+b4c03e63ae342865fd3c228b1a6c8f245a4b05c3 refs/remotes/origin/fix-fetch-failures-in-ipv6
+9dc11cedbfa197c2d2e2354c580b1546807017c7 refs/remotes/origin/fix-formatting-on-snapcraft
+66357019f034ffac342ebd49a32bd75c95d4dec9 refs/remotes/origin/fix-jellyfin-emby-links
+8e6f6b1873998c3a961f6f3bfdbf7573b268fcb4 refs/remotes/origin/fix-jellyfinMediaId4k
+044f9e667e6d3f302dc6e0b442c7f42ece39894e refs/remotes/origin/fix-library-sync-autogroup/ldap
+b5acc09ba98e2dd9b61e6b78721e4dd9f42a996c refs/remotes/origin/fix-library-sync-for-ldap-support
+ac33fe75b67c36849b2b42d5f69d41a51a3b92bb refs/remotes/origin/fix-library-toggle
+b85d7f37b931735ca2ad955dccb6599bf445fc73 refs/remotes/origin/fix-local-watchlist-page-item-removal
+cc041b5e0aa2b67573edba5919772b77a5111162 refs/remotes/origin/fix-log-format-jellyfin-auth
+e48f998a2b66c9960987624c6ba65b0b7dc86d43 refs/remotes/origin/fix-media-availability-sync-media-save
+30b441efcb3dc465e49e0b1d2e016ab677afca52 refs/remotes/origin/fix-pending-media
+6dd65f8c2571fca2919c843830d4f042213fd1de refs/remotes/origin/fix-radarr-downloadsync
+de1bf4caffe8305b3509d324fa6e1d9f81a1915e refs/remotes/origin/fix-retry-status
+cd8d5744ef1f739697bee06171ec527b9c8cb3ab refs/remotes/origin/fix-typeorm-update
+4933748f2bd51ab4695d38c83183963ba8ebfbd3 refs/remotes/origin/fix-user-privacy
+ed3a9b1c8d9d1eb0796b57398ce502bf6f62aa3a refs/remotes/origin/fix/0xsysr3ll/plex-availability-false-positives
+2ecdeb69012a11be63c4cf82e43d4fb4a1b4191d refs/remotes/origin/fix/release-process
+cb25ad8457d6977e214510227334720033ded5f0 refs/remotes/origin/fix/user-warning-length-of-undefined
+02599754026e6a66662f753bb6b6117dfabb5f9a refs/remotes/origin/forgotPasswordFix
+a9fa09f258fdd3e31424d9b36fb26b039f2f6cae refs/remotes/origin/gh-pages
+e908c11d45954b38c3a1d57b5c40130fadf58898 refs/remotes/origin/legacy-jellyseerr
+bd42194f61d54380fada1318a3ab51a90cb41001 refs/remotes/origin/logs-plex-pingtoken
+789bcc8eec3414da373328e374c2edb1abc3ac0d refs/remotes/origin/main
+637712e4fc3e0295b3f0606ddbee5789ffcc659e refs/remotes/origin/migrate-to-postgres
+55cf903bf6fcd885b306ece10a80f21108324183 refs/remotes/origin/pnpm-10-for-arch-folks
+cb672ec3c40982a58df3365f6434ba478842b33f refs/remotes/origin/pr-2273
+fd18a9fe9a616b2e67c67cd19dd2bcbaadb6f06d refs/remotes/origin/pr-934
+ca9074b11105359591d4850d22a35d437f2c2d8c refs/remotes/origin/preview-debug-watchlist
+9428664f2eea5a9640b24148d4c9cada3d56db28 refs/remotes/origin/prisma-(deprecated)
+42eec245b71e521557ea3742e98db42a0a0c5dd1 refs/remotes/origin/readme-update
+95980dc7c2d9e6a7fc00fddcb3fb1b13947dd469 refs/remotes/origin/refactor-i8n-message
+6caa0456bfb3a860870192e962f41b6d4647cb9f refs/remotes/origin/refactor-jellyfin-auth
+b72a4a5ad8f4ab7fd923a2485eb937a835122ba4 refs/remotes/origin/refactor-jellyfin-settings
+e5421a100317a1e6cc7fb4743406f5b71ce15302 refs/remotes/origin/refactor-weblate-merge
+dd5a9fad4fcdcc1064e7d339a34688d3556fd9a9 refs/remotes/origin/remove-fetch-api
+7d2bf3a0650b33f29f6853f8642c5f81fb3d3d53 refs/remotes/origin/rename-error-page-component
+63d9eedf00fecb8e74ea76d3d9b4ac9c77f02ed8 refs/remotes/origin/renovate/all-minor-patch
+31297bc3cf0927106c160f6338885d18048c5e00 refs/remotes/origin/renovate/email-templates-10.x
+fcf670da29b14e40d8fed798437079c9fef86315 refs/remotes/origin/renovate/headlessui-react-2.x
+ec6bcecd35b212d6ac9a95b5c2bf4715f84bcf3b refs/remotes/origin/renovate/major-commitlint-monorepo
+3610cd9f93983d6952cf76308f1bda92b5e5f8fc refs/remotes/origin/renovate/major-node.js
+fea85d6d31699946b5ea3f87478ee27930227366 refs/remotes/origin/renovate/node-24.x
+b4898bdad9c84380ef1d9fa0e1478022c2841cf4 refs/remotes/origin/renovate/node.js
+5a8ac31d87a2e7628cd622cf3aba8d8e39f13398 refs/remotes/origin/renovate/react-monorepo
+38825f8ad8f380c6ceb3940d620327a159d6b90b refs/remotes/origin/renovate/svgr-webpack-8.x
+51f4ce13588cb719d0deb0fcb654b3062cd608dd refs/remotes/origin/renovate/tailwindcss-monorepo
+4ea9779a60d3f2216fa825609d5b4df435208997 refs/remotes/origin/revert-disabled-seasonfolder
+f2c659c6f30fdc764ce7132ad41d78dbba843685 refs/remotes/origin/staging-for-1.1.1
+d9ca3c6e52c118698ca71021217f6ca409e71974 refs/remotes/origin/support-mixed-libraries
+38fb66d31e41232c01898d0d362af8338eb7b960 refs/remotes/origin/temp-fix-display-specials-within-season
+7ce592542622747c7e3e3e273f8c50c09a6ac945 refs/remotes/origin/test-custom-dns-servers
+acc3599f1b1195f597d4260b36489940ed7be270 refs/remotes/origin/test-disable-ratelimit
+b133d5a8a6e627c6f34533ff7a45b457b5835df8 refs/remotes/origin/test-externalapi-axios
+c26f576786f3058c1b292628df60d81c24d0c2eb refs/remotes/origin/test-fix-blacklist
+166796804e47baa58c7fb2d3e8cbe1a43ca8c818 refs/remotes/origin/test-fix-ip-forwarding
+b92fe7821ea76f8db5b34938c8c608e8d14ad1ff refs/remotes/origin/test-forceipv4-axios
+fdd4dcd847082848cb3e08aa07a9ba875341d33d refs/remotes/origin/test-ip-forwarding
+c355a7741716cf540666a4af7233a0afeb1ea225 refs/remotes/origin/test-node-v22
+1a9f75056412b96cd3a144a9109a5414e2ba9fcc refs/remotes/origin/weblate/translations-frontend
+7f3979411655ef5f65ce4918fe0f8f214403f75e refs/tags/preview-OIDC
+cc5c18c8edc7afbd12c08971d8575ebb938f7eeb refs/tags/preview-availability-sync-fix
+^ed3a9b1c8d9d1eb0796b57398ce502bf6f62aa3a
+13c71b5ae3409615f86bfad87e6df174f8acca6d refs/tags/preview-availability-sync-single-server-resolution
+8ac21bb8146c9d5711d12924365757faf3d8a40b refs/tags/preview-avatar-requestblock
+46e95317f68469cd2247ff42d5ba42c6de65ca3f refs/tags/preview-axios-config
+6315ba524638bc9cabfafccca679516408e62cd3 refs/tags/preview-back-to-axios
+618343d4d25a1c96c022bc7d911593ef651f5b23 refs/tags/preview-blacklist-tags
+c195a6f720b7ce340fe67b367b0cb507140b6c6b refs/tags/preview-cache-avatar
+374eaee616109a2c4adb03373dbc3706a5e98c02 refs/tags/preview-cache-avatar-image
+2c810a2120e2c5efe03ad26a28e950d03473e87c refs/tags/preview-csrf-protection-fix
+f8db770bf33884316bf0bd7f90d5e15b165923fa refs/tags/preview-debug-plex-watchlist
+f8369f4318dc71f83f72a94ebc8d7e06a4f49b9d refs/tags/preview-delete-media-in-list
+^b02711fd5e3b1c80ef41d98284707b4e5d35fc18
+d9b2d3ccf1f3bfdfae184aa01255b469324384a4 refs/tags/preview-dns-cache
+a45a465bea3953a5ccd0419d443c27cdd4313a11 refs/tags/preview-dns-cache-manager
+34d058f88028fa9c0f041c425c7c49a46f938ec3 refs/tags/preview-dns-servers
+^7ce592542622747c7e3e3e273f8c50c09a6ac945
+32d8c07dafe2eb94a7f1e90a47d434dd52f1d2c5 refs/tags/preview-emby-connect
+497d629207f8b6deefcbbc4069d91a3fa862b75d refs/tags/preview-faster-download-refresh
+d432dc6f71d8c75a243c53cfa40b46d8d5fc32f4 refs/tags/preview-fetch-refactor
+^7528a7c266532274ea443f1bd46abf8b0b0f2184
+461ed7e5d39f540b248a302a67d24f504c431072 refs/tags/preview-fix-avail-notif
+329527bd03343d87c27cba0352f71dbc4200a127 refs/tags/preview-fix-avatarproxy
+6dc00c8732af31d8628f10ff6ac7d9a0057e6975 refs/tags/preview-fix-basic-auth
+d09cca52e359a9d2cb127dc9c83702d63a507edc refs/tags/preview-fix-blacklist
+^9ad0ccdd3effea3fc2d0a5da46086442cd01957b
+e68777f484598d64d14eedddae18af4c54f630cc refs/tags/preview-fix-dns-caching
+^906ca61b60ffd3c0b58f60e471352739d8c322d9
+6a100de2ec888c06bdf8c9d43ead422dff1b3331 refs/tags/preview-fix-emby-header
+438ccae24c38c9a6bc4def82aaab9eb1c3f545ca refs/tags/preview-fix-invalid-blacklisttag
+a6e43901a65581f8ac106b274cfabc661e4fed8c refs/tags/preview-fix-plex-user-mismatch
+79951e1c20522d27c9b3f1c2f07bc04474f0b850 refs/tags/preview-fix-proxy-auth
+95ce4c501997154779de36df1f6d43d1e9303bf6 refs/tags/preview-fix-proxy-axios
+dcea6e965d2fce07f5d3b64cfae3886ec06cfd38 refs/tags/preview-fix-proxy-imagecaching
+f797e06e1867ff3b8fb63ca90645090d7ac9262c refs/tags/preview-fix-proxy-interceptors
+c7a605f398c9797f651371998c2501dfba80918a refs/tags/preview-fix-proxy-undici-v7
+^ebb36b4c6f9976704d07c80387d44115c35d4e68
+6a29e714447e2c920e4ac05fa47483f3f44342c3 refs/tags/preview-fix-ratelimit
+^f2a4b70ea0afc814f49faa25b93f22901046515f
+ca06800aabc2a0f51998a44ee2545d9f613e1ca8 refs/tags/preview-fix-remove-button
+^1a23f62a02fd6fd49ee2c46354275fbfda5510eb
+69bb84e2da27ceba613901173a0d27720ee49eec refs/tags/preview-fix-sonarr-scanner-metadata-provider
+d36cccc568c1e78aa0340a149da234f4c0fbc92d refs/tags/preview-fix-user-save
+cb25ad8457d6977e214510227334720033ded5f0 refs/tags/preview-fix-users-warning
+d1e7f5f943de1f3a5d9f3f44a22a9e22713ebf6d refs/tags/preview-fix-watchlist-error
+^2fb9bda1c64d9d64747f890180a70362cabb29a8
+0aa13deaebffecfb871823aa3d463564c6254582 refs/tags/preview-forceipv4-axios
+^b92fe7821ea76f8db5b34938c8c608e8d14ad1ff
+75651f63ad53e9ad7d99755bb22ce746ca0f2c03 refs/tags/preview-frame-ancestor
+54e3df2494d003e0f1c78046717c52245a82755e refs/tags/preview-gotify-linebreaks
+857844d0589e36ed43dd573d5eb0691f197e2cc9 refs/tags/preview-ip-forwarding
+37e22e8140fc1ef5bac3f4ca3d8b5b7283e92fdc refs/tags/preview-issue-description
+^d0999922cbfd9fcb69042bc7e4d63b4793aa7279
+b0913ebcf2ad009c3d74b575734a84d90102c8bf refs/tags/preview-jellyfin-apitokens
+^850fc7516b7dff89e5b2147fbc045a8f9f158b37
+d3c4ed6f2b41c8b4f9412b3284b6bf568ea7ecdd refs/tags/preview-jellyfin-emby-server-type
+^2d802a5eff12a912b655de096e81a7dc1a4f389c
+75afa742ea12e2504f6e2f528259e4d10976db1f refs/tags/preview-lifecycle-fix
+033ccac81373fc8ec647ae29b223173bbcff7331 refs/tags/preview-linked-accounts
+b30794dd20ab950c9555a134b82664601d35d2e6 refs/tags/preview-media-availability-status-fix
+19efb06faa25bc4c083cf12a7541e05752166541 refs/tags/preview-media-availability-sync
+99c06f115807e0899702936e33154f8ac80412a1 refs/tags/preview-more-discord-logs
+f86b3ce901469918aada9eb1255ec88ed6aa32cb refs/tags/preview-more-logs-pingtoken
+^bd42194f61d54380fada1318a3ab51a90cb41001
+23e959acc1ad62f3c670cfe4dd261b58fd576088 refs/tags/preview-more-proxy-settings
+1d7c936aa5f0391d9470855e644b68837cd75ba3 refs/tags/preview-music-support
+^49fef60cca0e05064a377fb25d54eaa834693580
+321865f9167776058dccf3283a28807a50f71079 refs/tags/preview-new-login
+0da85ca0d1121ecabae278d061769ef5b6892b71 refs/tags/preview-nextjs-update
+bcc180fae013d64fafd542311a2585d0589512bc refs/tags/preview-node-22
+^c355a7741716cf540666a4af7233a0afeb1ea225
+830ae90d816a84045114495c58c62ba0c93141fa refs/tags/preview-nodejs_22
+3c8fb4f4bb15ccf2ae04b8041c7d5789ac5234b5 refs/tags/preview-override-rules
+41a7b492d64e2db8d62021597d8bb2c6369b2a4b refs/tags/preview-password-manager
+cdf1180ef0e8aa120f1a600459e27d3486ba92d4 refs/tags/preview-plex-4k-debug-logs
+^b46a7d8804fef80510e25fd802ddf8501bdfe04c
+117089cdeedc929f7f7d4ef639d87a74662cc4b9 refs/tags/preview-plex-api-debug
+^eb08eb024f73d01b5abca68481fb9cab422f2c3a
+57135b39c6dc3fb204bee77ae7622b2063393ea5 refs/tags/preview-plex-home-profile
+6a8c28bce93ae5e7af93ea17471b88a4ab6fa5e3 refs/tags/preview-post-blacklist
+^818aa60aac185da07bfb71b08e0448939b63a736
+c73c0ae757e3d18d5778f3a2d4bed91ceb9f65c0 refs/tags/preview-post-fetch
+^b36bb3fa5819392869d01c90c5ea45acc341cb4e
+00e18a272a8842f0c3d59924f37967f9cbfb413e refs/tags/preview-postgres
+a061a6694670d4659daba31de3408b5c4cf0e7de refs/tags/preview-pr-1218
+bcd2bb7c96810f5a6932f42468a628d2db1bc771 refs/tags/preview-pr182
+3bf04f2abd96bf95a1363dd16e4de46cf621ab5d refs/tags/preview-pr338
+03316c642d1ecf89753789af08caf6e3aac80113 refs/tags/preview-pr374
+b5acc09ba98e2dd9b61e6b78721e4dd9f42a996c refs/tags/preview-pr524
+02050321221eaa39648a55aba74675879d0324f9 refs/tags/preview-pr773
+^b72a4a5ad8f4ab7fd923a2485eb937a835122ba4
+5729d2d93cb3f1b53376c4d29ff23d2fea0bef48 refs/tags/preview-pre-blacklist
+^ee7e91c7c948b17b556a625919eb1252a721bb6e
+ae955e9e7c02b58b2d8b077886f707bd8134ac07 refs/tags/preview-pre-fetch
+9e76a15e7fdfef590e806a43439940a2a3f3d3f2 refs/tags/preview-proxy-setting
+^4e741051f33a66d3a6cd907f2a1e5e27f9eecb0c
+ac5e2ba6c15235d30c7f31c2beeac708e748f489 refs/tags/preview-remonitor-sonarr-episodes
+9c1dfe3cfe52f135d4326ccb437b4c92c3e88a60 refs/tags/preview-remove-fetch
+^9803bc40df035aadafd03376e409349c78a7f27d
+bbf344bcbb4c1b24cb5a783b8f0505932bc79abe refs/tags/preview-rename-tags
+2f7cfa35335f982d23929adb49b8811af754eeb1 refs/tags/preview-revert-dns-caching
+d8325986bfa059e29e4487152b885f8398db88bf refs/tags/preview-seerr
+5eaa3ebb67646b6e40efb97fd69c1ad16d8cb5d1 refs/tags/preview-servarr-timeout-increase
+f8cfd07b46d723b040b9828fe2b1eb5a7fdeb2d7 refs/tags/preview-servarr-timeout-increase-more
+0a7529dc07ae1eb5455efacdd3683e3a66dc35c4 refs/tags/preview-sort-userlist
+dd459918742ca7779395c47bbf05a74bfc8f2fc3 refs/tags/preview-test-arm-builds
+^05046038090feb1d61edc45553018a9e1bb6c6fb
+d0ab274dab326b7287a6138695107ada858e1d14 refs/tags/preview-test-externalapi-axios
+^b133d5a8a6e627c6f34533ff7a45b457b5835df8
+c26f576786f3058c1b292628df60d81c24d0c2eb refs/tags/preview-test-fix-blacklist
+7619013989b73d13591984c91dc5c0ce14e62f64 refs/tags/preview-test-fix-subscriptions
+^275d6aaf08fcee0411b42598288b53cefa48f09b
+de1bf4caffe8305b3509d324fa6e1d9f81a1915e refs/tags/preview-test-retry
+74b6d793a3a8db34ece1d2c9050376b0fbbf46ec refs/tags/preview-tmdb-locale
+668a6ae0f86b8a9b16dc63b497680a70f3af2207 refs/tags/preview-tvdb
+2ee5535819ea4dfd9bb4195c0bec3edd2904a698 refs/tags/preview-tvdb-indexer
+cd8d5744ef1f739697bee06171ec527b9c8cb3ab refs/tags/preview-typeorm-fix
+d73f0391ab78c74a9b0d2160a467124a3a96ab44 refs/tags/preview-typeorm-lifecycle-fix
+801c95bbc55b55c89b00f807e27c6d7dc249b75f refs/tags/preview-typeorm-media-null-fix
+1955db5c35884536ecc72cb8c03d1b11bedd3967 refs/tags/preview-unix-socket
+48e3ece18f5a7d2604cb6f1d80486e4257cdf9d7 refs/tags/preview-unmonitored-season-processing
+c51479cc8e62a940ca7d11cf378df240be9446b4 refs/tags/preview-user-independent-items
+39abc2d7198c2c6664917b1eb58cc9b6cc408eb0 refs/tags/preview-without-ratelimit
+^acc3599f1b1195f597d4260b36489940ed7be270
+b03b9b1dbb06cfcc661adc9434f930b82e24fb8f refs/tags/v1.0.0
+6fecdf094d3139b034c67508f4c7d190c232cde5 refs/tags/v1.0.1
+ee14ff5a51dc77abaf264dc3d04d3b8b6d2f8ffd refs/tags/v1.0.2
+eceedbbaad601878b52e32e7d52f63af5e31c648 refs/tags/v1.1.0
+8feb20ff52994101df8d8be89a1ad553de4c8ce6 refs/tags/v1.1.1
+6049edffca7cc3bea68797ac8606800a94b9726b refs/tags/v1.2.0
+9252817b5823d70c551843b51158cdd3d57cd415 refs/tags/v1.2.1
+299f65c597435a45dbf0dc84aa409110383daa28 refs/tags/v1.3.0
+20c821e2ebb3ba0622059fb01baf9967bb56770d refs/tags/v1.4.0
+57e7d68092b24b19e35bfa5ed3cccc5c8215bc39 refs/tags/v1.4.1
+24151d27f7e2faf24bfc10b4a41cb6b3d31a8a45 refs/tags/v1.5.0
+5712e1980457aa1345fc0dd3dece6734deff259d refs/tags/v1.6.0
+325e2ed6d36b3a9dfe0cb25d583749194b92886c refs/tags/v1.7.0
+24fde7aec202253c3f592fa74a8322431694b12e refs/tags/v1.8.0
+2101d0fff5af19b1639de0d83ba674fd37c56453 refs/tags/v1.8.1
+25bf4b275a17c9b564eb4845adba783f75da3cc0 refs/tags/v1.9.0
+f735d860644aecbcfbf1a66910ab6e3e8e1d23db refs/tags/v1.9.1
+65def9d20de3b3dd18468fc36d62eac13092b612 refs/tags/v1.9.2
+63dfe003b0852d6307772abd331ffde8686e8c17 refs/tags/v2.0.0
+dc2cd9f28ebaba709abda1d71364ea72124c6988 refs/tags/v2.0.1
+e43fc721c8fcaaf7be1357e6634cc87ba1d47781 refs/tags/v2.1.0
+f2d7a2164858779180efda77b5db822b4ca07e35 refs/tags/v2.2.0
+d362b030f994045cbdd0f4dcddbce97fffdd5753 refs/tags/v2.2.1
+d4b707e619d9b93ea8b48c67378f51c0062abf78 refs/tags/v2.2.2
+a27bdb8ec66df3c2df40e99f45a16724f2c05d68 refs/tags/v2.2.3
+0bb2ee0e848e304bb08550cc67ad8584be5fcfcf refs/tags/v2.3.0
+ceaf0b6df573f037dd299716dae2e8bf71dcb418 refs/tags/v2.4.0
+4560c0f8433569d694be9d48b838a2441b5a37e6 refs/tags/v2.5.0
+5663ac1af32a04f73368f76192f3cc6b26dd9389 refs/tags/v2.5.1
+fac453878e3d55b93cfda78908403cce348bb9fa refs/tags/v2.5.2
+51ac65a78db55b795742bc3358e44858707231a2 refs/tags/v2.6.0
+c187ac0965fc805d0f7d87fcba8988e4d8560f5f refs/tags/v2.7.0
+49ac9c92b3ee7c3efc70db0705e2d058d6cd4aa1 refs/tags/v2.7.1
+697a08167f9db021b562c8b3b1c9e98021021390 refs/tags/v2.7.2
+e842036fafc9818ea38d2e19d4adb66e17e2aebf refs/tags/v2.7.3
+8b0831cd9af7ce5c2cc955aeba47863abd41f092 refs/tags/v3.0.0
+789bcc8eec3414da373328e374c2edb1abc3ac0d refs/tags/v3.0.1
