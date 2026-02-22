@@ -756,18 +756,22 @@ export class MediaRequest {
       let event: string | undefined;
       let notifyAdmin = true;
       let notifySystem = true;
+      let notifyUser = false;
 
       switch (type) {
         case Notification.MEDIA_APPROVED:
           event = `${entity.is4k ? '4K ' : ''}${mediaType} Request Approved`;
           notifyAdmin = false;
+          notifyUser = true;
           break;
         case Notification.MEDIA_DECLINED:
           event = `${entity.is4k ? '4K ' : ''}${mediaType} Request Declined`;
           notifyAdmin = false;
+          notifyUser = true;
           break;
         case Notification.MEDIA_PENDING:
           event = `New ${entity.is4k ? '4K ' : ''}${mediaType} Request`;
+          notifyUser = true;
           break;
         case Notification.MEDIA_AUTO_REQUESTED:
           event = `${
@@ -775,14 +779,17 @@ export class MediaRequest {
           }${mediaType} Request Automatically Submitted`;
           notifyAdmin = false;
           notifySystem = false;
+          notifyUser = true;
           break;
         case Notification.MEDIA_AUTO_APPROVED:
           event = `${
             entity.is4k ? '4K ' : ''
           }${mediaType} Request Automatically Approved`;
+          notifyUser = true;
           break;
         case Notification.MEDIA_FAILED:
           event = `${entity.is4k ? '4K ' : ''}${mediaType} Request Failed`;
+          notifyUser = true;
           break;
       }
 
@@ -797,7 +804,7 @@ export class MediaRequest {
           request: entity,
           notifyAdmin,
           notifySystem,
-          notifyUser: notifyAdmin ? undefined : entity.requestedBy,
+          notifyUser: notifyUser ? entity.requestedBy : undefined,
           event,
           subject: `${movie.title}${
             movie.release_date ? ` (${movie.release_date.slice(0, 4)})` : ''
@@ -826,7 +833,7 @@ export class MediaRequest {
           request: entity,
           notifyAdmin,
           notifySystem,
-          notifyUser: notifyAdmin ? undefined : entity.requestedBy,
+          notifyUser: notifyUser ? entity.requestedBy : undefined,
           event,
           subject: `${tv.name}${
             tv.first_air_date ? ` (${tv.first_air_date.slice(0, 4)})` : ''

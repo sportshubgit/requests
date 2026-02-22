@@ -9,11 +9,9 @@ import { useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import Error from '@app/pages/_error';
 import defineMessages from '@app/utils/defineMessages';
-import type { UserSettingsNotificationsResponse } from '@server/interfaces/api/userSettingsInterfaces';
 import { hasPermission, Permission } from '@server/lib/permissions';
 import { useRouter } from 'next/router';
 import { useIntl } from 'react-intl';
-import useSWR from 'swr';
 
 const messages = defineMessages('components.UserProfile.UserSettings', {
   menuGeneralSettings: 'General',
@@ -35,9 +33,6 @@ const UserSettings = ({ children }: UserSettingsProps) => {
   const { user: currentUser } = useUser();
   const { user, error } = useUser({ id: Number(router.query.userId) });
   const intl = useIntl();
-  const { data } = useSWR<UserSettingsNotificationsResponse>(
-    user ? `/api/v1/user/${user?.id}/settings/notifications` : null
-  );
 
   if (!user && !error) {
     return <LoadingSpinner />;
@@ -71,13 +66,7 @@ const UserSettings = ({ children }: UserSettingsProps) => {
     },
     {
       text: intl.formatMessage(messages.menuNotifications),
-      route: data?.emailEnabled
-        ? '/settings/notifications/email'
-        : data?.webPushEnabled
-          ? '/settings/notifications/webpush'
-          : data?.discordEnabled
-            ? '/settings/notifications/discord'
-            : '/settings/notifications/pushbullet',
+      route: '/settings/notifications/rocketchat',
       regex: /\/settings\/notifications/,
     },
     {
