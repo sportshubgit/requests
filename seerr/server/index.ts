@@ -12,6 +12,7 @@ import GotifyAgent from '@server/lib/notifications/agents/gotify';
 import NtfyAgent from '@server/lib/notifications/agents/ntfy';
 import PushbulletAgent from '@server/lib/notifications/agents/pushbullet';
 import PushoverAgent from '@server/lib/notifications/agents/pushover';
+import RocketChatAgent from '@server/lib/notifications/agents/rocketchat';
 import SlackAgent from '@server/lib/notifications/agents/slack';
 import TelegramAgent from '@server/lib/notifications/agents/telegram';
 import WebhookAgent from '@server/lib/notifications/agents/webhook';
@@ -132,6 +133,7 @@ app
       new NtfyAgent(),
       new PushbulletAgent(),
       new PushoverAgent(),
+      new RocketChatAgent(),
       new SlackAgent(),
       new TelegramAgent(),
       new WebhookAgent(),

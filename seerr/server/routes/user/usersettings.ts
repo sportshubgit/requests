@@ -5,7 +5,7 @@ import { MediaServerType } from '@server/constants/server';
 import { UserType } from '@server/constants/user';
 import { getRepository } from '@server/datasource';
 import { User } from '@server/entity/User';
-import { UserSettings } from '@server/entity/UserSettings';
+import { ALL_NOTIFICATIONS, UserSettings } from '@server/entity/UserSettings';
 import type {
   UserSettingsGeneralResponse,
   UserSettingsNotificationsResponse,
@@ -580,8 +580,14 @@ userSettingsRoutes.get<{ id: string }, UserSettingsNotificationsResponse>(
         telegramChatId: user.settings?.telegramChatId,
         telegramMessageThreadId: user.settings?.telegramMessageThreadId,
         telegramSendSilently: user.settings?.telegramSendSilently,
+        rocketChatEnabled: settings.rocketchat.enabled,
+        rocketChatUsername:
+          user.username || user.plexUsername || user.jellyfinUsername || null,
         webPushEnabled: settings.webpush.enabled,
-        notificationTypes: user.settings?.notificationTypes ?? {},
+        notificationTypes: Object.assign(
+          { rocketchat: ALL_NOTIFICATIONS },
+          user.settings?.notificationTypes ?? {}
+        ),
       });
     } catch (e) {
       next({ status: 500, message: e.message });
@@ -623,7 +629,10 @@ userSettingsRoutes.post<{ id: string }, UserSettingsNotificationsResponse>(
           telegramChatId: req.body.telegramChatId,
           telegramMessageThreadId: req.body.telegramMessageThreadId,
           telegramSendSilently: req.body.telegramSendSilently,
-          notificationTypes: req.body.notificationTypes,
+          notificationTypes: Object.assign(
+            { rocketchat: ALL_NOTIFICATIONS },
+            req.body.notificationTypes ?? {}
+          ),
         });
       } else {
         user.settings.pgpKey = req.body.pgpKey;
@@ -638,7 +647,7 @@ userSettingsRoutes.post<{ id: string }, UserSettingsNotificationsResponse>(
           req.body.telegramMessageThreadId;
         user.settings.telegramSendSilently = req.body.telegramSendSilently;
         user.settings.notificationTypes = Object.assign(
-          {},
+          { rocketchat: ALL_NOTIFICATIONS },
           user.settings.notificationTypes,
           req.body.notificationTypes
         );
@@ -656,6 +665,9 @@ userSettingsRoutes.post<{ id: string }, UserSettingsNotificationsResponse>(
         telegramChatId: user.settings.telegramChatId,
         telegramMessageThreadId: user.settings.telegramMessageThreadId,
         telegramSendSilently: user.settings.telegramSendSilently,
+        rocketChatEnabled: getSettings().notifications.agents.rocketchat.enabled,
+        rocketChatUsername:
+          user.username || user.plexUsername || user.jellyfinUsername || null,
         notificationTypes: user.settings.notificationTypes,
       });
     } catch (e) {

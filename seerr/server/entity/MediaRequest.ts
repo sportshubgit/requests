@@ -604,6 +604,9 @@ export class MediaRequest {
   @Column({ nullable: true })
   public languageProfileId: number;
 
+  @Column({ type: 'text', nullable: true })
+  public declineReason?: string | null;
+
   @Column({
     type: 'text',
     nullable: true,
@@ -785,6 +788,10 @@ export class MediaRequest {
 
       if (entity.type === MediaType.MOVIE) {
         const movie = await tmdb.getMovie({ movieId: media.tmdbId });
+        const extra =
+          type === Notification.MEDIA_DECLINED && entity.declineReason
+            ? [{ name: 'Decline Reason', value: entity.declineReason }]
+            : undefined;
         notificationManager.sendNotification(type, {
           media,
           request: entity,
@@ -800,10 +807,20 @@ export class MediaRequest {
             separator: /\s/,
             omission: '…',
           }),
+          extra,
           image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`,
         });
       } else if (entity.type === MediaType.TV) {
         const tv = await tmdb.getTvShow({ tvId: media.tmdbId });
+        const extra: { name: string; value: string }[] = [
+          {
+            name: 'Requested Seasons',
+            value: entity.seasons.map((season) => season.seasonNumber).join(', '),
+          },
+        ];
+        if (type === Notification.MEDIA_DECLINED && entity.declineReason) {
+          extra.push({ name: 'Decline Reason', value: entity.declineReason });
+        }
         notificationManager.sendNotification(type, {
           media,
           request: entity,
@@ -820,14 +837,7 @@ export class MediaRequest {
             omission: '…',
           }),
           image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${tv.poster_path}`,
-          extra: [
-            {
-              name: 'Requested Seasons',
-              value: entity.seasons
-                .map((season) => season.seasonNumber)
-                .join(', '),
-            },
-          ],
+          extra,
         });
       }
     } catch (e) {

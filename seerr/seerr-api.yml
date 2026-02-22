@@ -1292,6 +1292,9 @@ components:
           type: number
         rootFolder:
           type: string
+        declineReason:
+          type: string
+          nullable: true
       required:
         - id
         - status
@@ -1452,6 +1455,26 @@ components:
           type: object
           properties:
             webhookUrl:
+              type: string
+    RocketChatSettings:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          example: false
+        types:
+          type: number
+          example: 2
+        options:
+          type: object
+          properties:
+            serverUrl:
+              type: string
+            userId:
+              type: string
+            authToken:
+              type: string
+            systemChannel:
               type: string
     WebPushSettings:
       type: object
@@ -2002,6 +2025,11 @@ components:
         telegramSendSilently:
           type: boolean
           nullable: true
+        rocketChatEnabled:
+          type: boolean
+        rocketChatUsername:
+          type: string
+          nullable: true
     NotificationAgentTypes:
       type: object
       properties:
@@ -2012,6 +2040,8 @@ components:
         pushbullet:
           type: number
         pushover:
+          type: number
+        rocketchat:
           type: number
         slack:
           type: number
@@ -3674,6 +3704,52 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/SlackSettings'
+      responses:
+        '204':
+          description: Test notification attempted
+  /settings/notifications/rocketchat:
+    get:
+      summary: Get Rocket.Chat notification settings
+      description: Returns current Rocket.Chat notification settings in a JSON object.
+      tags:
+        - settings
+      responses:
+        '200':
+          description: Returned Rocket.Chat settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RocketChatSettings'
+    post:
+      summary: Update Rocket.Chat notification settings
+      description: Updates Rocket.Chat notification settings with the provided values.
+      tags:
+        - settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RocketChatSettings'
+      responses:
+        '200':
+          description: 'Values were sucessfully updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RocketChatSettings'
+  /settings/notifications/rocketchat/test:
+    post:
+      summary: Test Rocket.Chat settings
+      description: Sends a test notification to the Rocket.Chat agent.
+      tags:
+        - settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RocketChatSettings'
       responses:
         '204':
           description: Test notification attempted
@@ -6583,6 +6659,16 @@ paths:
           schema:
             type: string
             enum: [approve, decline]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                declineReason:
+                  type: string
+                  nullable: true
       responses:
         '200':
           description: Request status changed

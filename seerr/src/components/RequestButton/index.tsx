@@ -35,6 +35,7 @@ const messages = defineMessages('components.RequestButton', {
     'Approve {requestCount, plural, one {4K Request} other {{requestCount} 4K Requests}}',
   decline4krequests:
     'Decline {requestCount, plural, one {4K Request} other {{requestCount} 4K Requests}}',
+  declineReasonPrompt: 'Enter a reason for declining this request:',
 });
 
 interface ButtonOption {
@@ -94,9 +95,12 @@ const RequestButton = ({
 
   const modifyRequest = async (
     request: MediaRequest,
-    type: 'approve' | 'decline'
+    type: 'approve' | 'decline',
+    declineReason?: string
   ) => {
-    const response = await axios.post(`/api/v1/request/${request.id}/${type}`);
+    const response = await axios.post(`/api/v1/request/${request.id}/${type}`, {
+      declineReason,
+    });
 
     if (response) {
       onUpdate();
@@ -106,7 +110,8 @@ const RequestButton = ({
 
   const modifyRequests = async (
     requests: MediaRequest[],
-    type: 'approve' | 'decline'
+    type: 'approve' | 'decline',
+    declineReason?: string
   ): Promise<void> => {
     if (!requests) {
       return;
@@ -114,7 +119,9 @@ const RequestButton = ({
 
     await Promise.all(
       requests.map(async (request) => {
-        return axios.post(`/api/v1/request/${request.id}/${type}`);
+        return axios.post(`/api/v1/request/${request.id}/${type}`, {
+          declineReason,
+        });
       })
     );
 
@@ -161,7 +168,13 @@ const RequestButton = ({
           id: 'decline-request',
           text: intl.formatMessage(messages.declinerequest),
           action: () => {
-            modifyRequest(activeRequest, 'decline');
+            const reason = window.prompt(
+              intl.formatMessage(messages.declineReasonPrompt)
+            );
+            if (reason === null || !reason.trim()) {
+              return;
+            }
+            modifyRequest(activeRequest, 'decline', reason.trim());
           },
           svg: <XMarkIcon />,
         }
@@ -189,7 +202,13 @@ const RequestButton = ({
             requestCount: activeRequests.length,
           }),
           action: () => {
-            modifyRequests(activeRequests, 'decline');
+            const reason = window.prompt(
+              intl.formatMessage(messages.declineReasonPrompt)
+            );
+            if (reason === null || !reason.trim()) {
+              return;
+            }
+            modifyRequests(activeRequests, 'decline', reason.trim());
           },
           svg: <XMarkIcon />,
         }
@@ -231,7 +250,13 @@ const RequestButton = ({
           id: 'decline-4k-request',
           text: intl.formatMessage(messages.declinerequest4k),
           action: () => {
-            modifyRequest(active4kRequest, 'decline');
+            const reason = window.prompt(
+              intl.formatMessage(messages.declineReasonPrompt)
+            );
+            if (reason === null || !reason.trim()) {
+              return;
+            }
+            modifyRequest(active4kRequest, 'decline', reason.trim());
           },
           svg: <XMarkIcon />,
         }
@@ -259,7 +284,13 @@ const RequestButton = ({
             requestCount: active4kRequests.length,
           }),
           action: () => {
-            modifyRequests(active4kRequests, 'decline');
+            const reason = window.prompt(
+              intl.formatMessage(messages.declineReasonPrompt)
+            );
+            if (reason === null || !reason.trim()) {
+              return;
+            }
+            modifyRequests(active4kRequests, 'decline', reason.trim());
           },
           svg: <XMarkIcon />,
         }

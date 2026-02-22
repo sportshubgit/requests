@@ -36,6 +36,7 @@ const messages = defineMessages('components.RequestBlock', {
   lastmodifiedby: 'Last Modified By',
   approve: 'Approve Request',
   decline: 'Decline Request',
+  declineReasonPrompt: 'Enter a reason for declining this request:',
   edit: 'Edit Request',
   delete: 'Delete Request',
 });
@@ -53,9 +54,14 @@ const RequestBlock = ({ request, onUpdate }: RequestBlockProps) => {
   const { profile, rootFolder, server, languageProfile } =
     useRequestOverride(request);
 
-  const updateRequest = async (type: 'approve' | 'decline'): Promise<void> => {
+  const updateRequest = async (
+    type: 'approve' | 'decline',
+    declineReason?: string
+  ): Promise<void> => {
     setIsUpdating(true);
-    await axios.post(`/api/v1/request/${request.id}/${type}`);
+    await axios.post(`/api/v1/request/${request.id}/${type}`, {
+      declineReason,
+    });
 
     if (onUpdate) {
       onUpdate();
@@ -171,7 +177,15 @@ const RequestBlock = ({ request, onUpdate }: RequestBlockProps) => {
                   <Button
                     buttonType="danger"
                     className="mr-1"
-                    onClick={() => updateRequest('decline')}
+                    onClick={() => {
+                      const reason = window.prompt(
+                        intl.formatMessage(messages.declineReasonPrompt)
+                      );
+                      if (reason === null || !reason.trim()) {
+                        return;
+                      }
+                      updateRequest('decline', reason.trim());
+                    }}
                     disabled={isUpdating}
                   >
                     <XMarkIcon />

@@ -1,17 +1,12 @@
 import Alert from '@app/components/Common/Alert';
-import Badge from '@app/components/Common/Badge';
 import List from '@app/components/Common/List';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import PageTitle from '@app/components/Common/PageTitle';
-import Releases from '@app/components/Settings/SettingsAbout/Releases';
 import globalMessages from '@app/i18n/globalMessages';
 import Error from '@app/pages/_error';
 import defineMessages from '@app/utils/defineMessages';
 import { InformationCircleIcon } from '@heroicons/react/24/solid';
-import type {
-  SettingsAboutResponse,
-  StatusResponse,
-} from '@server/interfaces/api/settingsInterfaces';
+import type { SettingsAboutResponse } from '@server/interfaces/api/settingsInterfaces';
 import { useIntl } from 'react-intl';
 import useSWR from 'swr';
 
@@ -28,8 +23,6 @@ const messages = defineMessages('components.Settings.SettingsAbout', {
   supportseerr: 'Support SportsHub',
   contribute: 'Make a Contribution',
   documentation: 'Documentation',
-  outofdate: 'Out of Date',
-  uptodate: 'Up to Date',
   betawarning:
     'This is BETA software. Features may be broken and/or unstable. Please report any issues on GitHub!',
   runningDevelop:
@@ -41,8 +34,6 @@ const SettingsAbout = () => {
   const { data, error } = useSWR<SettingsAboutResponse>(
     '/api/v1/settings/about'
   );
-
-  const { data: status } = useSWR<StatusResponse>('/api/v1/status');
 
   if (!data && !error) {
     return <LoadingSpinner />;
@@ -100,42 +91,6 @@ const SettingsAbout = () => {
             <code className="truncate">
               {data.version.replace('develop-', '')}
             </code>
-            {status?.commitTag !== 'local' &&
-              (status?.updateAvailable ? (
-                <a
-                  href={
-                    data.version.startsWith('develop-')
-                      ? `https://github.com/seerr-team/seerr/compare/${status.commitTag}...develop`
-                      : 'https://github.com/seerr-team/seerr/releases'
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Badge
-                    badgeType="warning"
-                    className="ml-2 !cursor-pointer transition hover:bg-yellow-400"
-                  >
-                    {intl.formatMessage(messages.outofdate)}
-                  </Badge>
-                </a>
-              ) : (
-                <a
-                  href={
-                    data.version.startsWith('develop-')
-                      ? 'https://github.com/seerr-team/seerr/commits/develop'
-                      : 'https://github.com/seerr-team/seerr/releases'
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Badge
-                    badgeType="success"
-                    className="ml-2 !cursor-pointer transition hover:bg-green-400"
-                  >
-                    {intl.formatMessage(messages.uptodate)}
-                  </Badge>
-                </a>
-              ))}
           </List.Item>
           <List.Item title={intl.formatMessage(messages.totalmedia)}>
             {intl.formatNumber(data.totalMediaItems)}
@@ -200,9 +155,6 @@ const SettingsAbout = () => {
             </a>
           </List.Item>
         </List>
-      </div>
-      <div className="section">
-        <Releases currentVersion={data.version} />
       </div>
     </>
   );

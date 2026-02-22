@@ -82,6 +82,7 @@ export class UserSettings {
           discord: 0,
           pushbullet: 0,
           pushover: 0,
+          rocketchat: ALL_NOTIFICATIONS,
           slack: 0,
           telegram: 0,
           webhook: 0,
@@ -106,6 +107,10 @@ export class UserSettings {
 
         if (values.webpush == null) {
           values.webpush = ALL_NOTIFICATIONS;
+        }
+
+        if (values.rocketchat == null) {
+          values.rocketchat = ALL_NOTIFICATIONS;
         }
 
         return values;

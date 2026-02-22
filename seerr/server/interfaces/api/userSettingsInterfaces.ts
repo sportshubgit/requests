@@ -36,6 +36,8 @@ export interface UserSettingsNotificationsResponse {
   telegramChatId?: string;
   telegramMessageThreadId?: string;
   telegramSendSilently?: boolean;
+  rocketChatEnabled?: boolean;
+  rocketChatUsername?: string | null;
   webPushEnabled?: boolean;
   notificationTypes: Partial<NotificationAgentTypes>;
 }

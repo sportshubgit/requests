@@ -44,7 +44,6 @@ import {
   EyeSlashIcon,
   FilmIcon,
   MinusCircleIcon,
-  PlayIcon,
   StarIcon,
 } from '@heroicons/react/24/solid';
 import type { RTRating } from '@server/api/rating/rottentomatoes';
@@ -55,7 +54,6 @@ import {
   MediaStatus,
   MediaType,
 } from '@server/constants/media';
-import { MediaServerType } from '@server/constants/server';
 import type { Crew } from '@server/models/common';
 import type { TvDetails as TvDetailsType } from '@server/models/Tv';
 import axios from 'axios';
@@ -83,8 +81,6 @@ const messages = defineMessages('components.TvDetails', {
   anime: 'Anime',
   network: '{networkCount, plural, one {Network} other {Networks}}',
   viewfullcrew: 'View Full Crew',
-  play: 'Play on {mediaServerName}',
-  play4k: 'Play 4K on {mediaServerName}',
   seasons: '{seasonCount, plural, one {# Season} other {# Seasons}}',
   episodeRuntime: 'Episode Runtime',
   episodeRuntimeMinutes: '{runtime} minutes',
@@ -192,33 +188,6 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
   }
 
   const mediaLinks: PlayButtonLink[] = [];
-
-  if (
-    plexUrl &&
-    hasPermission([Permission.REQUEST, Permission.REQUEST_TV], {
-      type: 'or',
-    })
-  ) {
-    mediaLinks.push({
-      text: getAvailableMediaServerName(),
-      url: plexUrl,
-      svg: <PlayIcon />,
-    });
-  }
-
-  if (
-    settings.currentSettings.series4kEnabled &&
-    plexUrl4k &&
-    hasPermission([Permission.REQUEST_4K, Permission.REQUEST_4K_TV], {
-      type: 'or',
-    })
-  ) {
-    mediaLinks.push({
-      text: getAvailable4kMediaServerName(),
-      url: plexUrl4k,
-      svg: <PlayIcon />,
-    });
-  }
 
   const trailerVideo = data.relatedVideos
     ?.filter((r) => r.type === 'Trailer')
@@ -340,30 +309,6 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
     data?.watchProviders?.find(
       (provider) => provider.iso_3166_1 === streamingRegion
     )?.flatrate ?? [];
-
-  function getAvailableMediaServerName() {
-    if (settings.currentSettings.mediaServerType === MediaServerType.EMBY) {
-      return intl.formatMessage(messages.play, { mediaServerName: 'Emby' });
-    }
-
-    if (settings.currentSettings.mediaServerType === MediaServerType.PLEX) {
-      return intl.formatMessage(messages.play, { mediaServerName: 'Plex' });
-    }
-
-    return intl.formatMessage(messages.play, { mediaServerName: 'Jellyfin' });
-  }
-
-  function getAvailable4kMediaServerName() {
-    if (settings.currentSettings.mediaServerType === MediaServerType.EMBY) {
-      return intl.formatMessage(messages.play, { mediaServerName: 'Emby' });
-    }
-
-    if (settings.currentSettings.mediaServerType === MediaServerType.PLEX) {
-      return intl.formatMessage(messages.play4k, { mediaServerName: 'Plex' });
-    }
-
-    return intl.formatMessage(messages.play, { mediaServerName: 'Jellyfin' });
-  }
 
   const onClickWatchlistBtn = async (): Promise<void> => {
     setIsUpdating(true);

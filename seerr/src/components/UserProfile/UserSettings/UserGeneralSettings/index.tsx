@@ -100,30 +100,6 @@ const UserGeneralSettings = () => {
     user ? `/api/v1/user/${user?.id}/settings/main` : null
   );
 
-  const UserGeneralSettingsSchema = Yup.object().shape({
-    email:
-      // email is required for everybody except non-admin jellyfin users
-      user?.id === 1 ||
-      (user?.userType !== UserType.JELLYFIN && user?.userType !== UserType.EMBY)
-        ? Yup.string()
-            .test(
-              'email',
-              intl.formatMessage(messages.validationemailformat),
-              (value) =>
-                !value || validator.isEmail(value, { require_tld: false })
-            )
-            .required(intl.formatMessage(messages.validationemailrequired))
-        : Yup.string().test(
-            'email',
-            intl.formatMessage(messages.validationemailformat),
-            (value) =>
-              !value || validator.isEmail(value, { require_tld: false })
-          ),
-    discordId: Yup.string()
-      .nullable()
-      .matches(/^\d{17,19}$/, intl.formatMessage(messages.validationDiscordId)),
-  });
-
   useEffect(() => {
     setMovieQuotaEnabled(
       data?.movieQuotaLimit != undefined && data?.movieQuotaDays != undefined
@@ -141,6 +117,19 @@ const UserGeneralSettings = () => {
     return <ErrorPage statusCode={500} />;
   }
 
+  const isSportsHubSyntheticEmail =
+    !!data.email && data.email.toLowerCase().endsWith('@xui.local');
+  const isEmailRequiredByWarning = !!user?.warnings.find(
+    (w) => w === 'userEmailRequired'
+  );
+  const isEmailRequiredByUserType =
+    user?.id === 1 ||
+    (user?.userType !== UserType.JELLYFIN && user?.userType !== UserType.EMBY);
+  const shouldRequireEmail =
+    isEmailRequiredByWarning ||
+    (isEmailRequiredByUserType && !isSportsHubSyntheticEmail);
+  const showEmailField = !isSportsHubSyntheticEmail || isEmailRequiredByWarning;
+
   return (
     <>
       <PageTitle
@@ -157,7 +146,10 @@ const UserGeneralSettings = () => {
       <Formik
         initialValues={{
           displayName: data?.username !== user?.email ? data?.username : '',
-          email: data?.email?.includes('@') ? data.email : '',
+          email:
+            !isSportsHubSyntheticEmail && data?.email?.includes('@')
+              ? data.email
+              : '',
           discordId: data?.discordId ?? '',
           locale: data?.locale,
           discoverRegion: data?.discoverRegion,
@@ -170,7 +162,29 @@ const UserGeneralSettings = () => {
           watchlistSyncMovies: data?.watchlistSyncMovies,
           watchlistSyncTv: data?.watchlistSyncTv,
         }}
-        validationSchema={UserGeneralSettingsSchema}
+        validationSchema={Yup.object().shape({
+          email: shouldRequireEmail
+            ? Yup.string()
+                .test(
+                  'email',
+                  intl.formatMessage(messages.validationemailformat),
+                  (value) =>
+                    !value || validator.isEmail(value, { require_tld: false })
+                )
+                .required(intl.formatMessage(messages.validationemailrequired))
+            : Yup.string().test(
+                'email',
+                intl.formatMessage(messages.validationemailformat),
+                (value) =>
+                  !value || validator.isEmail(value, { require_tld: false })
+              ),
+          discordId: Yup.string()
+            .nullable()
+            .matches(
+              /^\d{17,19}$/,
+              intl.formatMessage(messages.validationDiscordId)
+            ),
+        })}
         enableReinitialize
         onSubmit={async (values) => {
           try {
@@ -303,7 +317,7 @@ const UserGeneralSettings = () => {
                       placeholder={
                         user?.jellyfinUsername ||
                         user?.plexUsername ||
-                        user?.email
+                        user?.username
                       }
                     />
                   </div>
@@ -314,33 +328,35 @@ const UserGeneralSettings = () => {
                     )}
                 </div>
               </div>
-              <div className="form-row">
-                <label htmlFor="email" className="text-label">
-                  {intl.formatMessage(messages.email)}
-                  {user?.warnings.find((w) => w === 'userEmailRequired') && (
-                    <span className="label-required">*</span>
-                  )}
-                </label>
-                <div className="form-input-area">
-                  <div className="form-input-field">
-                    <Field
-                      id="email"
-                      name="email"
-                      type="text"
-                      placeholder="example@domain.com"
-                      disabled={user?.plexUsername}
-                      className={
-                        user?.warnings.find((w) => w === 'userEmailRequired')
-                          ? 'border-2 border-red-400 focus:border-blue-600'
-                          : ''
-                      }
-                    />
+              {showEmailField && (
+                <div className="form-row">
+                  <label htmlFor="email" className="text-label">
+                    {intl.formatMessage(messages.email)}
+                    {isEmailRequiredByWarning && (
+                      <span className="label-required">*</span>
+                    )}
+                  </label>
+                  <div className="form-input-area">
+                    <div className="form-input-field">
+                      <Field
+                        id="email"
+                        name="email"
+                        type="text"
+                        placeholder=""
+                        disabled={user?.plexUsername}
+                        className={
+                          isEmailRequiredByWarning
+                            ? 'border-2 border-red-400 focus:border-blue-600'
+                            : ''
+                        }
+                      />
+                    </div>
+                    {errors.email && touched.email && (
+                      <div className="error">{errors.email}</div>
+                    )}
                   </div>
-                  {errors.email && touched.email && (
-                    <div className="error">{errors.email}</div>
-                  )}
                 </div>
-              </div>
+              )}
               <div className="form-row">
                 <label htmlFor="discordId" className="text-label">
                   {intl.formatMessage(messages.discordId)}

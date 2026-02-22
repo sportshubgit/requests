@@ -39,7 +39,6 @@ import {
   EyeSlashIcon,
   FilmIcon,
   MinusCircleIcon,
-  PlayIcon,
   CheckCircleIcon,
   StarIcon,
   TicketIcon,
@@ -51,7 +50,6 @@ import {
 import { type RatingResponse } from '@server/api/ratings';
 import { IssueStatus } from '@server/constants/issue';
 import { MediaStatus, MediaType } from '@server/constants/media';
-import { MediaServerType } from '@server/constants/server';
 import type { MovieDetails as MovieDetailsType } from '@server/models/Movie';
 import axios from 'axios';
 import { countries } from 'country-flag-icons';
@@ -83,8 +81,6 @@ const messages = defineMessages('components.MovieDetails', {
   openradarr: 'Open Movie in Radarr',
   openradarr4k: 'Open Movie in 4K Radarr',
   downloadstatus: 'Download Status',
-  play: 'Play on {mediaServerName}',
-  play4k: 'Play 4K on {mediaServerName}',
   markavailable: 'Mark as Available',
   mark4kavailable: 'Mark as Available in 4K',
   showmore: 'Show More',
@@ -198,33 +194,6 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
   const showAllStudios = data.productionCompanies.length <= minStudios + 1;
   const mediaLinks: PlayButtonLink[] = [];
 
-  if (
-    plexUrl &&
-    hasPermission([Permission.REQUEST, Permission.REQUEST_MOVIE], {
-      type: 'or',
-    })
-  ) {
-    mediaLinks.push({
-      text: getAvailableMediaServerName(),
-      url: plexUrl,
-      svg: <PlayIcon />,
-    });
-  }
-
-  if (
-    settings.currentSettings.movie4kEnabled &&
-    plexUrl4k &&
-    hasPermission([Permission.REQUEST_4K, Permission.REQUEST_4K_MOVIE], {
-      type: 'or',
-    })
-  ) {
-    mediaLinks.push({
-      text: getAvailable4kMediaServerName(),
-      url: plexUrl4k,
-      svg: <PlayIcon />,
-    });
-  }
-
   const trailerVideo = data.relatedVideos
     ?.filter((r) => r.type === 'Trailer')
     .sort((a, b) => a.size - b.size)
@@ -312,30 +281,6 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
     data?.watchProviders?.find(
       (provider) => provider.iso_3166_1 === streamingRegion
     )?.flatrate ?? [];
-
-  function getAvailableMediaServerName() {
-    if (settings.currentSettings.mediaServerType === MediaServerType.EMBY) {
-      return intl.formatMessage(messages.play, { mediaServerName: 'Emby' });
-    }
-
-    if (settings.currentSettings.mediaServerType === MediaServerType.PLEX) {
-      return intl.formatMessage(messages.play, { mediaServerName: 'Plex' });
-    }
-
-    return intl.formatMessage(messages.play, { mediaServerName: 'Jellyfin' });
-  }
-
-  function getAvailable4kMediaServerName() {
-    if (settings.currentSettings.mediaServerType === MediaServerType.EMBY) {
-      return intl.formatMessage(messages.play, { mediaServerName: 'Emby' });
-    }
-
-    if (settings.currentSettings.mediaServerType === MediaServerType.PLEX) {
-      return intl.formatMessage(messages.play4k, { mediaServerName: 'Plex' });
-    }
-
-    return intl.formatMessage(messages.play4k, { mediaServerName: 'Jellyfin' });
-  }
 
   const onClickWatchlistBtn = async (): Promise<void> => {
     setIsUpdating(true);

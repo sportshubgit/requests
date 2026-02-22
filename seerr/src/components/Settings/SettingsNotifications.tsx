@@ -10,7 +10,12 @@ import type { SettingsRoute } from '@app/components/Common/SettingsTabs';
 import SettingsTabs from '@app/components/Common/SettingsTabs';
 import globalMessages from '@app/i18n/globalMessages';
 import defineMessages from '@app/utils/defineMessages';
-import { BoltIcon, CloudIcon, EnvelopeIcon } from '@heroicons/react/24/solid';
+import {
+  BoltIcon,
+  ChatBubbleOvalLeftEllipsisIcon,
+  CloudIcon,
+  EnvelopeIcon,
+} from '@heroicons/react/24/solid';
 import { useIntl } from 'react-intl';
 
 const messages = defineMessages('components.Settings', {
@@ -107,6 +112,17 @@ const SettingsNotifications = ({ children }: SettingsNotificationsProps) => {
       ),
       route: '/settings/notifications/pushover',
       regex: /^\/settings\/notifications\/pushover/,
+    },
+    {
+      text: 'Rocket.Chat',
+      content: (
+        <span className="flex items-center">
+          <ChatBubbleOvalLeftEllipsisIcon className="mr-2 h-4" />
+          Rocket.Chat
+        </span>
+      ),
+      route: '/settings/notifications/rocketchat',
+      regex: /^\/settings\/notifications\/rocketchat/,
     },
     {
       text: 'Slack',

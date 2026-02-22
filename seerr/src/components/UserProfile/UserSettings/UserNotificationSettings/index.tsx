@@ -10,7 +10,11 @@ import { useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import Error from '@app/pages/_error';
 import defineMessages from '@app/utils/defineMessages';
-import { CloudIcon, EnvelopeIcon } from '@heroicons/react/24/solid';
+import {
+  ChatBubbleOvalLeftEllipsisIcon,
+  CloudIcon,
+  EnvelopeIcon,
+} from '@heroicons/react/24/solid';
 import type { UserSettingsNotificationsResponse } from '@server/interfaces/api/userSettingsInterfaces';
 import { useRouter } from 'next/router';
 import { useIntl } from 'react-intl';
@@ -76,6 +80,18 @@ const UserNotificationSettings = ({
       route: '/settings/notifications/discord',
       regex: /\/settings\/notifications\/discord/,
       hidden: !data?.discordEnabled,
+    },
+    {
+      text: 'Rocket.Chat',
+      content: (
+        <span className="flex items-center">
+          <ChatBubbleOvalLeftEllipsisIcon className="mr-2 h-4" />
+          Rocket.Chat
+        </span>
+      ),
+      route: '/settings/notifications/rocketchat',
+      regex: /\/settings\/notifications\/rocketchat/,
+      hidden: !data?.rocketChatEnabled || !data?.rocketChatUsername,
     },
     {
       text: 'Pushbullet',

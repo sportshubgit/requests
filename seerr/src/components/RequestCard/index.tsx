@@ -38,6 +38,7 @@ const messages = defineMessages('components.RequestCard', {
   tvdbid: 'TheTVDB ID',
   approverequest: 'Approve Request',
   declinerequest: 'Decline Request',
+  declineReasonPrompt: 'Enter a reason for declining this request:',
   editrequest: 'Edit Request',
   cancelrequest: 'Cancel Request',
   deleterequest: 'Delete Request',
@@ -259,8 +260,13 @@ const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
     iOSPlexUrl4k: requestData?.media?.iOSPlexUrl4k,
   });
 
-  const modifyRequest = async (type: 'approve' | 'decline') => {
-    const response = await axios.post(`/api/v1/request/${request.id}/${type}`);
+  const modifyRequest = async (
+    type: 'approve' | 'decline',
+    declineReason?: string
+  ) => {
+    const response = await axios.post(`/api/v1/request/${request.id}/${type}`, {
+      declineReason,
+    });
 
     if (response) {
       revalidate();
@@ -519,7 +525,15 @@ const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
                       buttonType="danger"
                       buttonSize="sm"
                       className="hidden sm:block"
-                      onClick={() => modifyRequest('decline')}
+                      onClick={() => {
+                        const reason = window.prompt(
+                          intl.formatMessage(messages.declineReasonPrompt)
+                        );
+                        if (reason === null || !reason.trim()) {
+                          return;
+                        }
+                        modifyRequest('decline', reason.trim());
+                      }}
                     >
                       <XMarkIcon />
                       <span>{intl.formatMessage(globalMessages.decline)}</span>
@@ -531,7 +545,15 @@ const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
                         buttonType="danger"
                         buttonSize="sm"
                         className="sm:hidden"
-                        onClick={() => modifyRequest('decline')}
+                        onClick={() => {
+                          const reason = window.prompt(
+                            intl.formatMessage(messages.declineReasonPrompt)
+                          );
+                          if (reason === null || !reason.trim()) {
+                            return;
+                          }
+                          modifyRequest('decline', reason.trim());
+                        }}
                       >
                         <XMarkIcon />
                       </Button>

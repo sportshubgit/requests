@@ -46,6 +46,7 @@ const messages = defineMessages('components.RequestList.RequestItem', {
   unknowntitle: 'Unknown Title',
   removearr: 'Remove from {arr}',
   profileName: 'Profile',
+  declineReasonPrompt: 'Enter a reason for declining this request:',
 });
 
 const isMovie = (movie: MovieDetails | TvDetails): movie is MovieDetails => {
@@ -323,8 +324,13 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
 
   const [isRetrying, setRetrying] = useState(false);
 
-  const modifyRequest = async (type: 'approve' | 'decline') => {
-    const response = await axios.post(`/api/v1/request/${request.id}/${type}`);
+  const modifyRequest = async (
+    type: 'approve' | 'decline',
+    declineReason?: string
+  ) => {
+    const response = await axios.post(`/api/v1/request/${request.id}/${type}`, {
+      declineReason,
+    });
 
     if (response) {
       revalidate();
@@ -723,7 +729,15 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                   <Button
                     className="w-full"
                     buttonType="danger"
-                    onClick={() => modifyRequest('decline')}
+                    onClick={() => {
+                      const reason = window.prompt(
+                        intl.formatMessage(messages.declineReasonPrompt)
+                      );
+                      if (reason === null || !reason.trim()) {
+                        return;
+                      }
+                      modifyRequest('decline', reason.trim());
+                    }}
                   >
                     <XMarkIcon />
                     <span>{intl.formatMessage(globalMessages.decline)}</span>

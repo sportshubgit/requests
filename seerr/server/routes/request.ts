@@ -719,6 +719,14 @@ requestRoutes.post<{
       }
 
       request.status = newStatus;
+      if (newStatus === MediaRequestStatus.DECLINED) {
+        const rawReason = req.body?.declineReason;
+        const parsedReason =
+          typeof rawReason === 'string' ? rawReason.trim() : '';
+        request.declineReason = parsedReason || null;
+      } else {
+        request.declineReason = null;
+      }
       request.modifiedBy = req.user;
       await requestRepository.save(request);
 

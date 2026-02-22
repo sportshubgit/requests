@@ -7,6 +7,7 @@ import GotifyAgent from '@server/lib/notifications/agents/gotify';
 import NtfyAgent from '@server/lib/notifications/agents/ntfy';
 import PushbulletAgent from '@server/lib/notifications/agents/pushbullet';
 import PushoverAgent from '@server/lib/notifications/agents/pushover';
+import RocketChatAgent from '@server/lib/notifications/agents/rocketchat';
 import SlackAgent from '@server/lib/notifications/agents/slack';
 import TelegramAgent from '@server/lib/notifications/agents/telegram';
 import WebhookAgent from '@server/lib/notifications/agents/webhook';
@@ -89,6 +90,40 @@ notificationRoutes.post('/slack/test', async (req, res, next) => {
     return next({
       status: 500,
       message: 'Failed to send Slack notification.',
+    });
+  }
+});
+
+notificationRoutes.get('/rocketchat', (_req, res) => {
+  const settings = getSettings();
+
+  res.status(200).json(settings.notifications.agents.rocketchat);
+});
+
+notificationRoutes.post('/rocketchat', async (req, res) => {
+  const settings = getSettings();
+
+  settings.notifications.agents.rocketchat = req.body;
+  await settings.save();
+
+  res.status(200).json(settings.notifications.agents.rocketchat);
+});
+
+notificationRoutes.post('/rocketchat/test', async (req, res, next) => {
+  if (!req.user) {
+    return next({
+      status: 500,
+      message: 'User information is missing from the request.',
+    });
+  }
+
+  const rocketChatAgent = new RocketChatAgent(req.body);
+  if (await sendTestNotification(rocketChatAgent, req.user)) {
+    return res.status(204).send();
+  } else {
+    return next({
+      status: 500,
+      message: 'Failed to send Rocket.Chat notification.',
     });
   }
 });

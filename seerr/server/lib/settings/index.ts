@@ -235,6 +235,15 @@ export interface NotificationAgentSlack extends NotificationAgentConfig {
   };
 }
 
+export interface NotificationAgentRocketChat extends NotificationAgentConfig {
+  options: {
+    serverUrl: string;
+    userId: string;
+    authToken: string;
+    systemChannel?: string;
+  };
+}
+
 export interface NotificationAgentEmail extends NotificationAgentConfig {
   options: {
     userEmailRequired: boolean;
@@ -314,6 +323,7 @@ export enum NotificationAgentKey {
   NTFY = 'ntfy',
   PUSHBULLET = 'pushbullet',
   PUSHOVER = 'pushover',
+  ROCKETCHAT = 'rocketchat',
   SLACK = 'slack',
   TELEGRAM = 'telegram',
   WEBHOOK = 'webhook',
@@ -327,6 +337,7 @@ interface NotificationAgents {
   ntfy: NotificationAgentNtfy;
   pushbullet: NotificationAgentPushbullet;
   pushover: NotificationAgentPushover;
+  rocketchat: NotificationAgentRocketChat;
   slack: NotificationAgentSlack;
   telegram: NotificationAgentTelegram;
   webhook: NotificationAgentWebhook;
@@ -510,6 +521,17 @@ class Settings {
               accessToken: '',
               userToken: '',
               sound: '',
+            },
+          },
+          rocketchat: {
+            enabled: false,
+            embedPoster: true,
+            types: 0,
+            options: {
+              serverUrl: '',
+              userId: '',
+              authToken: '',
+              systemChannel: '',
             },
           },
           webhook: {
