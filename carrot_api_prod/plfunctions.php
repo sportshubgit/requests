@@ -19,10 +19,10 @@ class plfunctions
 	var $list = "";
 	var $streamerid = "0";
 	var $useridserver ="0";
-	var $ip_adressuser ="";
+  var $ip_adressuser ="";
   var $auth = 0;
-  var $sportshub_mylist_movie_category_id = "999999991";
-  var $sportshub_mylist_series_category_id = "999999992";
+  var $sportshub_mylist_movie_category_id = "199999991";
+  var $sportshub_mylist_series_category_id = "199999992";
   var $sportshub_sync_db_path = __DIR__ . "/storage/sportshub_sync.db";
  
    
@@ -1716,7 +1716,6 @@ $tn = date("Y-m-d H:i:s.0", time());
     if ($category !== null && $category !== ''){
       $stmt->bindValue(':category', (string)$category, SQLITE3_TEXT);
     }
-
     $result = $stmt->execute();
     $rows = array();
     if ($result) {
@@ -1876,6 +1875,85 @@ $tn = date("Y-m-d H:i:s.0", time());
     return null;
   }
 
+  function normalizeLookupTitle($value){
+    $value = trim((string)$value);
+    if ($value === ''){
+      return '';
+    }
+    $value = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $value = strtolower($value);
+    $value = preg_replace('/\((19|20)\d{2}\)/', ' ', $value);
+    $value = preg_replace('/[^a-z0-9]+/', ' ', $value);
+    return trim(preg_replace('/\s+/', ' ', $value));
+  }
+
+  function normalizeLookupYear($value){
+    $value = preg_replace('/[^0-9]/', '', (string)$value);
+    if (strlen($value) !== 4) {
+      return '';
+    }
+    $year = (int)$value;
+    if ($year < 1900 || $year > 2100) {
+      return '';
+    }
+    return (string)$year;
+  }
+
+  function resolvePVODMovieIdByTitleYear($title, $year = ''){
+    $normalizedTitle = $this->normalizeLookupTitle($title);
+    if ($normalizedTitle === ''){
+      return null;
+    }
+    $normalizedYear = $this->normalizeLookupYear($year);
+
+    $shdb = mysqli_connect("144.76.182.242", "sportshub", "XXS1S0SsxCQyKwFK", "pvod");
+    if (!$shdb) {
+      return null;
+    }
+
+    $sql = "SELECT mov_id,mov_name,year,releasedate FROM movies";
+    if ($normalizedYear !== '') {
+      $sql .= " WHERE year = ? OR releasedate LIKE CONCAT(?, '%')";
+    }
+    $sql .= " ORDER BY mov_id DESC LIMIT 1000";
+
+    $stmt = mysqli_prepare($shdb, $sql);
+    if (!$stmt) {
+      mysqli_close($shdb);
+      return null;
+    }
+
+    if ($normalizedYear !== '') {
+      mysqli_stmt_bind_param($stmt, 'ss', $normalizedYear, $normalizedYear);
+    }
+
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+
+    $bestId = null;
+    while ($row = mysqli_fetch_assoc($res)) {
+      $candidateTitle = $this->normalizeLookupTitle(isset($row['mov_name']) ? $row['mov_name'] : '');
+      if ($candidateTitle === '' || $candidateTitle !== $normalizedTitle) {
+        continue;
+      }
+      $candidateYear = $this->normalizeLookupYear(isset($row['year']) ? $row['year'] : '');
+      if ($candidateYear === '' && isset($row['releasedate'])) {
+        $candidateYear = $this->normalizeLookupYear(substr((string)$row['releasedate'], 0, 4));
+      }
+      if ($normalizedYear !== '' && $candidateYear !== '' && $candidateYear !== $normalizedYear) {
+        continue;
+      }
+      if (isset($row['mov_id'])) {
+        $bestId = (int)$row['mov_id'];
+        break;
+      }
+    }
+
+    mysqli_stmt_close($stmt);
+    mysqli_close($shdb);
+    return $bestId;
+  }
+
   function resolvePVODSeriesIdByExternalIds($imdbId, $tmdbId, $tvdbId){
     $shdb = mysqli_connect("144.76.182.242", "sportshub", "XXS1S0SsxCQyKwFK", "pvod");
     if (!$shdb) {
@@ -1911,6 +1989,51 @@ $tn = date("Y-m-d H:i:s.0", time());
 
     mysqli_close($shdb);
     return null;
+  }
+
+  function resolvePVODSeriesIdByTitleYear($title, $year = ''){
+    $normalizedTitle = $this->normalizeLookupTitle($title);
+    if ($normalizedTitle === ''){
+      return null;
+    }
+    $normalizedYear = $this->normalizeLookupYear($year);
+
+    $shdb = mysqli_connect("144.76.182.242", "sportshub", "XXS1S0SsxCQyKwFK", "pvod");
+    if (!$shdb) {
+      return null;
+    }
+
+    $sql = "SELECT ser_id,ser_name,releasedate FROM series ORDER BY ser_id DESC LIMIT 1000";
+    $stmt = mysqli_prepare($shdb, $sql);
+    if (!$stmt) {
+      mysqli_close($shdb);
+      return null;
+    }
+
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+
+    $bestId = null;
+    while ($row = mysqli_fetch_assoc($res)) {
+      $candidateTitle = $this->normalizeLookupTitle(isset($row['ser_name']) ? $row['ser_name'] : '');
+      if ($candidateTitle === '' || $candidateTitle !== $normalizedTitle) {
+        continue;
+      }
+      if ($normalizedYear !== '') {
+        $candidateYear = $this->normalizeLookupYear(substr((string)$row['releasedate'], 0, 4));
+        if ($candidateYear !== '' && $candidateYear !== $normalizedYear) {
+          continue;
+        }
+      }
+      if (isset($row['ser_id'])) {
+        $bestId = (int)$row['ser_id'];
+        break;
+      }
+    }
+
+    mysqli_stmt_close($stmt);
+    mysqli_close($shdb);
+    return $bestId;
   }
 
 }

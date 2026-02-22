@@ -63,6 +63,49 @@ function safe_category($value, $defaultCategory) {
   return $value;
 }
 
+function normalize_year_candidate($value) {
+  $value = preg_replace('/[^0-9]/', '', (string)$value);
+  if (strlen($value) !== 4) {
+    return '';
+  }
+  $year = (int)$value;
+  if ($year < 1900 || $year > 2100) {
+    return '';
+  }
+  return (string)$year;
+}
+
+function extract_year_for_match($payload) {
+  $metadata = isset($payload['metadata']) && is_array($payload['metadata'])
+    ? $payload['metadata']
+    : array();
+
+  $candidates = array(
+    isset($metadata['year']) ? $metadata['year'] : '',
+    isset($metadata['releaseYear']) ? $metadata['releaseYear'] : '',
+    isset($metadata['releaseDate']) ? substr((string)$metadata['releaseDate'], 0, 4) : '',
+    isset($payload['year']) ? $payload['year'] : '',
+  );
+
+  foreach ($candidates as $candidate) {
+    $year = normalize_year_candidate($candidate);
+    if ($year !== '') {
+      return $year;
+    }
+  }
+
+  $title = isset($payload['title']) ? (string)$payload['title'] : '';
+  if (preg_match('/\((19|20)\d{2}\)/', $title, $match) === 1) {
+    return normalize_year_candidate($match[0]);
+  }
+
+  if (preg_match('/\b(19|20)\d{2}\b/', $title, $match) === 1) {
+    return normalize_year_candidate($match[0]);
+  }
+
+  return '';
+}
+
 function sqlite_upsert_row($sqlite, $record) {
   $now = time();
   $stmt = $sqlite->prepare('
@@ -222,10 +265,25 @@ $imdbId = isset($externalIds['imdbId']) ? trim((string)$externalIds['imdbId']) :
 $tvdbId = isset($externalIds['tvdbId']) ? (string)$externalIds['tvdbId'] : '';
 
 $internalId = null;
+$resolveStrategy = 'external_ids';
 if ($mediaType === 'movie') {
   $internalId = $plf->resolvePVODMovieIdByExternalIds($imdbId, $tmdbId, $tvdbId);
 } else {
   $internalId = $plf->resolvePVODSeriesIdByExternalIds($imdbId, $tmdbId, $tvdbId);
+}
+
+$titleForFallback = isset($payload['title']) ? trim((string)$payload['title']) : '';
+$yearForFallback = extract_year_for_match($payload);
+
+if (!$internalId && $titleForFallback !== '') {
+  if ($mediaType === 'movie') {
+    $internalId = $plf->resolvePVODMovieIdByTitleYear($titleForFallback, $yearForFallback);
+  } else {
+    $internalId = $plf->resolvePVODSeriesIdByTitleYear($titleForFallback, $yearForFallback);
+  }
+  if ($internalId) {
+    $resolveStrategy = 'title_year_fallback';
+  }
 }
 
 if (!$internalId) {
@@ -238,6 +296,8 @@ if (!$internalId) {
       'imdbId' => $imdbId,
       'tvdbId' => $tvdbId,
     ),
+    'title' => $titleForFallback,
+    'year' => $yearForFallback,
   ));
 }
 
@@ -300,7 +360,7 @@ sync_response(200, array(
   'user' => $username,
   'mediaType' => $mediaType,
   'internalId' => (int)$internalId,
+  'resolveStrategy' => $resolveStrategy,
   'category' => $category,
   'watched' => (bool)$watched,
 ));
-

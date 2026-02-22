@@ -13,9 +13,17 @@ Original files in parent folder were not edited.
 - Creates two virtual categories per logged-in user:
   - `999999991` = `My List` (movies)
   - `999999992` = `My Series` (series)
+- Adds smart watched splits:
+  - `999999995` = `My List - Watched` (movies)
+  - `999999996` = `My List - Unwatched` (movies)
+  - `999999997` = `My Series - Watched` (series)
+  - `999999998` = `My Series - Unwatched` (series)
 - SportsHub posts events to `sportshub_sync.php`.
 - Sync writes **user-scoped** rows to `storage/sportshub_sync.db`.
 - `player_api.php` merges those rows at read-time and serves only that user's items.
+- Sync lookup order:
+  1) external IDs (`imdbId`, `tmdbId`, `tvdbId`)
+  2) strict title/year fallback (for sources where IDs differ)
 
 ## Production wiring
 1. Point `request.brb.ac` (SportsHub/Seerr) tracked sync URL to:
@@ -62,4 +70,3 @@ curl -sS -X POST "https://carrot.brb.ac/sportshub_sync.php" \
 curl -sS "https://carrot.brb.ac/player_api.php?username=YOURUSER&password=YOURPASS&action=get_vod_categories"
 curl -sS "https://carrot.brb.ac/player_api.php?username=YOURUSER&password=YOURPASS&action=get_vod_streams&category_id=999999991"
 ```
-

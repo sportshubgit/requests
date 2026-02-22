@@ -181,7 +181,7 @@
                 $output[] = Array("category_id" => $category["id"], "category_name" => utf8_encode($category["category_name"]), "parent_id" => 0);
 				
 			}
-            append_virtual_category($output, $plf->getSportsHubMyListMovieCategoryId(), "My List");
+            append_virtual_category($output, $plf->getSportsHubMyListMovieCategoryId(), " My SH Watchlist");
       
 
             //$output = [];
@@ -217,7 +217,7 @@
                 "parent_id" => 0);
 				
 			}
-            append_virtual_category($output, $plf->getSportsHubMyListSeriesCategoryId(), "My Series");
+            append_virtual_category($output, $plf->getSportsHubMyListSeriesCategoryId(), " My SH Watchlist");
 
             //$output = [];
 			//  }
