@@ -204,10 +204,11 @@ class RocketChatAgent
 
     if (
       payload.notifyUser &&
-      payload.notifyUser.settings?.hasNotificationType(
-        NotificationAgentKey.ROCKETCHAT,
-        type
-      )
+      (!payload.notifyUser.settings ||
+        payload.notifyUser.settings.hasNotificationType(
+          NotificationAgentKey.ROCKETCHAT,
+          type
+        ))
     ) {
       const username = this.getUsername(payload.notifyUser);
       if (username) {
