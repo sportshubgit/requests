@@ -31,7 +31,7 @@ type WatchlistRow = {
 const messages = defineMessages('components.MyList', {
   pageTitle: 'My List',
   heading: 'My List',
-  empty: 'Your list is empty. Add titles from movie and series pages.',
+  empty: 'Your list is empty. Add movies or series from any detail page.',
   markWatched: 'Mark watched',
   markUnwatched: 'Mark unwatched',
   remove: 'Remove',
@@ -40,22 +40,23 @@ const messages = defineMessages('components.MyList', {
   unwatched: 'Unwatched',
   updated: 'List updated.',
   updateFailed: 'Could not update list item.',
+  loadFailed: 'Could not load My List. Please refresh or contact support.',
   howItWorks: 'How My List works',
   dismissGuide: 'Dismiss',
-  guideBannerTitle: 'Track what you want and what you have watched',
+  guideBannerTitle: 'Keep track of what you want to watch',
   guideBannerBody:
-    'Add titles from movie/series pages, request missing titles, and tick watched here. Once content is available, refresh playlists in your app to see updates.',
-  guideStepOne: '1. Add movies/series to My List from detail pages.',
+    'Use My List for favourites and requests. When new content is ready, refresh your playlist in your player app.',
+  guideStepOne: '1. Tap the star on a movie or series to add it to My List.',
   guideStepTwo:
-    '2. If status is not available, submit a request and SportsHub sends it to Radarr/Sonarr.',
+    '2. If a title is missing, send a request from the same page.',
   guideStepThree:
-    '3. Tick watched when finished; this pushes your watched state and category to your API endpoint.',
+    '3. Your requests are also added to My List automatically.',
   guideStepFour:
-    '4. When content becomes available, refresh your playlist/library in the player app.',
+    '4. When content is available, refresh your playlist/library in your player app.',
   guideStatusLegend: 'Status guide',
-  guideStatusRequested: 'Requested: queued and waiting for processing.',
-  guideStatusDownloading: 'Downloading: currently processing in Radarr/Sonarr.',
-  guideStatusAvailable: 'Available: ready to play in your media app.',
+  guideStatusRequested: 'Requested: we have your request.',
+  guideStatusDownloading: 'Downloading: content is being prepared.',
+  guideStatusAvailable: 'Available: ready to play in your app.',
 });
 
 const getStatusLabel = (status?: MediaStatus) => {
@@ -100,6 +101,26 @@ const MyList = () => {
 
   if (!data && !error) {
     return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return (
+      <>
+        <PageTitle title={intl.formatMessage(messages.pageTitle)} />
+        <div className="mb-5 mt-1">
+          <div className="flex items-center justify-between gap-3">
+            <Header>{intl.formatMessage(messages.heading)}</Header>
+            <Button buttonType="default" buttonSize="sm" onClick={() => setShowGuide(true)}>
+              <QuestionMarkCircleIcon />
+              <span>{intl.formatMessage(messages.howItWorks)}</span>
+            </Button>
+          </div>
+        </div>
+        <div className="rounded-lg border border-red-700 bg-red-900/20 p-6 text-red-200">
+          {intl.formatMessage(messages.loadFailed)}
+        </div>
+      </>
+    );
   }
 
   const onToggleWatched = async (item: WatchlistRow) => {

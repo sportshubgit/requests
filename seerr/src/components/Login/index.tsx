@@ -1,11 +1,11 @@
 import ImageFader from '@app/components/Common/ImageFader';
+import Modal from '@app/components/Common/Modal';
 import PageTitle from '@app/components/Common/PageTitle';
 import LanguagePicker from '@app/components/Layout/LanguagePicker';
 import XuiLogin from '@app/components/Login/XuiLogin';
 import { useUser } from '@app/hooks/useUser';
 import defineMessages from '@app/utils/defineMessages';
 import { Transition } from '@headlessui/react';
-import { XCircleIcon } from '@heroicons/react/24/solid';
 import { useRouter } from 'next/dist/client/router';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
@@ -16,14 +16,22 @@ const messages = defineMessages('components.Login', {
   signin: 'Sign In',
   sportshubsigninheader: 'SportsHub',
   sportshubsigninsubheader: 'Log in with SportsHub credentials.',
+  welcomeTitle: 'Welcome to SportsHub',
+  welcomeBody:
+    'Use SportsHub to request movies and series, and save titles to My List.',
+  welcomeStepOne: 'Add titles to My List from any movie or series page.',
+  welcomeStepTwo:
+    'If a title is missing, request it and SportsHub will process it for you.',
+  welcomeStepThree:
+    'When new content is ready, refresh your playlist in your player app to see it.',
+  welcomeButton: 'Got it',
 });
 
 const Login = () => {
   const intl = useIntl();
   const router = useRouter();
   const { user, revalidate } = useUser();
-
-  const [error, setError] = useState('');
+  const [showWelcome, setShowWelcome] = useState(false);
 
   // Effect that is triggered whenever `useUser`'s user changes. If we get a new
   // valid user, we redirect the user to the home page as the login was successful.
@@ -32,6 +40,24 @@ const Login = () => {
       router.push('/');
     }
   }, [user, router]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const seen = window.localStorage.getItem('sportshub-login-guide-seen');
+    if (seen !== 'true') {
+      setShowWelcome(true);
+    }
+  }, []);
+
+  const dismissWelcome = () => {
+    setShowWelcome(false);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('sportshub-login-guide-seen', 'true');
+    }
+  };
 
   const { data: backdrops } = useSWR<string[]>('/api/v1/backdrops', {
     refreshInterval: 0,
@@ -62,42 +88,43 @@ const Login = () => {
           className="bg-gray-800 bg-opacity-50 shadow sm:rounded-lg"
           style={{ backdropFilter: 'blur(5px)' }}
         >
-          <>
-            <Transition
-              as="div"
-              show={!!error}
-              enter="transition-opacity duration-300"
-              enterFrom="opacity-0"
-              enterTo="opacity-100"
-              leave="transition-opacity duration-300"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0"
-            >
-              <div className="mb-4 rounded-md bg-red-600 p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <XCircleIcon className="h-5 w-5 text-red-300" />
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-300">
-                      {error}
-                    </h3>
-                  </div>
-                </div>
-              </div>
-            </Transition>
-            <div className="px-10 py-8">
-              <h2 className="mb-2 text-center text-xl font-bold text-neutral-100">
-                {intl.formatMessage(messages.sportshubsigninheader)}
-              </h2>
-              <p className="mb-6 text-center text-sm text-gray-300">
-                {intl.formatMessage(messages.sportshubsigninsubheader)}
-              </p>
-              <XuiLogin revalidate={revalidate} />
-            </div>
-          </>
+          <div className="px-10 py-8">
+            <h2 className="mb-2 text-center text-xl font-bold text-neutral-100">
+              {intl.formatMessage(messages.sportshubsigninheader)}
+            </h2>
+            <p className="mb-6 text-center text-sm text-gray-300">
+              {intl.formatMessage(messages.sportshubsigninsubheader)}
+            </p>
+            <XuiLogin revalidate={revalidate} />
+          </div>
         </div>
       </div>
+      <Transition
+        appear
+        show={showWelcome}
+        enter="transition ease-in-out duration-300 transform opacity-0"
+        enterFrom="opacity-0"
+        enterTo="opacity-100"
+        leave="transition ease-in-out duration-300 transform opacity-100"
+        leaveFrom="opacity-100"
+        leaveTo="opacity-0"
+      >
+        <Modal
+          title={intl.formatMessage(messages.welcomeTitle)}
+          onOk={dismissWelcome}
+          okText={intl.formatMessage(messages.welcomeButton)}
+          backgroundClickable={false}
+        >
+          <p className="text-sm text-gray-200">
+            {intl.formatMessage(messages.welcomeBody)}
+          </p>
+          <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-gray-200">
+            <li>{intl.formatMessage(messages.welcomeStepOne)}</li>
+            <li>{intl.formatMessage(messages.welcomeStepTwo)}</li>
+            <li>{intl.formatMessage(messages.welcomeStepThree)}</li>
+          </ul>
+        </Modal>
+      </Transition>
     </div>
   );
 };
