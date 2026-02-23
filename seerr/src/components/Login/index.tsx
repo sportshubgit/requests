@@ -1,5 +1,6 @@
 import ImageFader from '@app/components/Common/ImageFader';
 import Modal from '@app/components/Common/Modal';
+import { SettingsContext } from '@app/context/SettingsContext';
 import PageTitle from '@app/components/Common/PageTitle';
 import LanguagePicker from '@app/components/Layout/LanguagePicker';
 import XuiLogin from '@app/components/Login/XuiLogin';
@@ -8,7 +9,7 @@ import defineMessages from '@app/utils/defineMessages';
 import { Transition } from '@headlessui/react';
 import { useRouter } from 'next/dist/client/router';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import useSWR from 'swr';
 
@@ -31,6 +32,7 @@ const Login = () => {
   const intl = useIntl();
   const router = useRouter();
   const { user, revalidate } = useUser();
+  const { currentSettings } = useContext(SettingsContext);
   const [showWelcome, setShowWelcome] = useState(false);
 
   // Effect that is triggered whenever `useUser`'s user changes. If we get a new
@@ -46,11 +48,16 @@ const Login = () => {
       return;
     }
 
+    if (!currentSettings.loginGuideEnabled) {
+      setShowWelcome(false);
+      return;
+    }
+
     const seen = window.localStorage.getItem('sportshub-login-guide-seen');
-    if (seen !== 'true') {
+    if (!currentSettings.loginGuideShowOnce || seen !== 'true') {
       setShowWelcome(true);
     }
-  }, []);
+  }, [currentSettings.loginGuideEnabled, currentSettings.loginGuideShowOnce]);
 
   const dismissWelcome = () => {
     setShowWelcome(false);
@@ -101,7 +108,7 @@ const Login = () => {
       </div>
       <Transition
         appear
-        show={showWelcome}
+        show={showWelcome && currentSettings.loginGuideEnabled}
         enter="transition ease-in-out duration-300 transform opacity-0"
         enterFrom="opacity-0"
         enterTo="opacity-100"
@@ -110,18 +117,31 @@ const Login = () => {
         leaveTo="opacity-0"
       >
         <Modal
-          title={intl.formatMessage(messages.welcomeTitle)}
+          title={
+            currentSettings.loginGuideTitle ||
+            intl.formatMessage(messages.welcomeTitle)
+          }
           onOk={dismissWelcome}
           okText={intl.formatMessage(messages.welcomeButton)}
           backgroundClickable={false}
         >
           <p className="text-sm text-gray-200">
-            {intl.formatMessage(messages.welcomeBody)}
+            {currentSettings.loginGuideBody ||
+              intl.formatMessage(messages.welcomeBody)}
           </p>
           <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-gray-200">
-            <li>{intl.formatMessage(messages.welcomeStepOne)}</li>
-            <li>{intl.formatMessage(messages.welcomeStepTwo)}</li>
-            <li>{intl.formatMessage(messages.welcomeStepThree)}</li>
+            <li>
+              {currentSettings.loginGuideStepOne ||
+                intl.formatMessage(messages.welcomeStepOne)}
+            </li>
+            <li>
+              {currentSettings.loginGuideStepTwo ||
+                intl.formatMessage(messages.welcomeStepTwo)}
+            </li>
+            <li>
+              {currentSettings.loginGuideStepThree ||
+                intl.formatMessage(messages.welcomeStepThree)}
+            </li>
           </ul>
         </Modal>
       </Transition>

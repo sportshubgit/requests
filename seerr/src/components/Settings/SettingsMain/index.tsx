@@ -68,6 +68,16 @@ const messages = defineMessages('components.Settings.SettingsMain', {
   youtubeUrl: 'YouTube URL',
   youtubeUrlTip:
     'Base URL for YouTube videos if a self-hosted YouTube instance is used.',
+  loginGuideSection: 'Login Guide Popup',
+  loginGuideSectionTip:
+    'Edit the user-facing popup shown on the sign-in page.',
+  loginGuideEnabled: 'Enable Login Guide Popup',
+  loginGuideShowOnce: 'Show Once Per Browser',
+  loginGuideTitle: 'Popup Title',
+  loginGuideBody: 'Popup Message',
+  loginGuideStepOne: 'Step 1',
+  loginGuideStepTwo: 'Step 2',
+  loginGuideStepThree: 'Step 3',
   validationUrl: 'You must provide a valid URL',
   validationUrlTrailingSlash: 'URL must not end in a trailing slash',
 });
@@ -175,6 +185,13 @@ const SettingsMain = () => {
             enableSpecialEpisodes: data?.enableSpecialEpisodes,
             cacheImages: data?.cacheImages,
             youtubeUrl: data?.youtubeUrl,
+            loginGuideEnabled: data?.loginGuideEnabled ?? true,
+            loginGuideShowOnce: data?.loginGuideShowOnce ?? true,
+            loginGuideTitle: data?.loginGuideTitle ?? '',
+            loginGuideBody: data?.loginGuideBody ?? '',
+            loginGuideStepOne: data?.loginGuideStepOne ?? '',
+            loginGuideStepTwo: data?.loginGuideStepTwo ?? '',
+            loginGuideStepThree: data?.loginGuideStepThree ?? '',
           }}
           enableReinitialize
           validationSchema={MainSettingsSchema}
@@ -195,6 +212,13 @@ const SettingsMain = () => {
                 enableSpecialEpisodes: values.enableSpecialEpisodes,
                 cacheImages: values.cacheImages,
                 youtubeUrl: values.youtubeUrl,
+                loginGuideEnabled: values.loginGuideEnabled,
+                loginGuideShowOnce: values.loginGuideShowOnce,
+                loginGuideTitle: values.loginGuideTitle,
+                loginGuideBody: values.loginGuideBody,
+                loginGuideStepOne: values.loginGuideStepOne,
+                loginGuideStepTwo: values.loginGuideStepTwo,
+                loginGuideStepThree: values.loginGuideStepThree,
               });
               mutate('/api/v1/settings/public');
               mutate('/api/v1/status');
@@ -556,6 +580,103 @@ const SettingsMain = () => {
                       typeof errors.youtubeUrl === 'string' && (
                         <div className="error">{errors.youtubeUrl}</div>
                       )}
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label htmlFor="loginGuideEnabled" className="checkbox-label">
+                    <span className="mr-2">
+                      {intl.formatMessage(messages.loginGuideEnabled)}
+                    </span>
+                    <span className="label-tip">
+                      {intl.formatMessage(messages.loginGuideSectionTip)}
+                    </span>
+                  </label>
+                  <div className="form-input-area">
+                    <Field
+                      type="checkbox"
+                      id="loginGuideEnabled"
+                      name="loginGuideEnabled"
+                      onChange={() => {
+                        setFieldValue(
+                          'loginGuideEnabled',
+                          !values.loginGuideEnabled
+                        );
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label htmlFor="loginGuideShowOnce" className="checkbox-label">
+                    <span className="mr-2">
+                      {intl.formatMessage(messages.loginGuideShowOnce)}
+                    </span>
+                  </label>
+                  <div className="form-input-area">
+                    <Field
+                      type="checkbox"
+                      id="loginGuideShowOnce"
+                      name="loginGuideShowOnce"
+                      onChange={() => {
+                        setFieldValue(
+                          'loginGuideShowOnce',
+                          !values.loginGuideShowOnce
+                        );
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label htmlFor="loginGuideTitle" className="text-label">
+                    {intl.formatMessage(messages.loginGuideTitle)}
+                  </label>
+                  <div className="form-input-area">
+                    <div className="form-input-field">
+                      <Field id="loginGuideTitle" name="loginGuideTitle" type="text" />
+                    </div>
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label htmlFor="loginGuideBody" className="text-label">
+                    {intl.formatMessage(messages.loginGuideBody)}
+                  </label>
+                  <div className="form-input-area">
+                    <div className="form-input-field">
+                      <Field as="textarea" id="loginGuideBody" name="loginGuideBody" rows={3} />
+                    </div>
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label htmlFor="loginGuideStepOne" className="text-label">
+                    {intl.formatMessage(messages.loginGuideStepOne)}
+                  </label>
+                  <div className="form-input-area">
+                    <div className="form-input-field">
+                      <Field id="loginGuideStepOne" name="loginGuideStepOne" type="text" />
+                    </div>
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label htmlFor="loginGuideStepTwo" className="text-label">
+                    {intl.formatMessage(messages.loginGuideStepTwo)}
+                  </label>
+                  <div className="form-input-area">
+                    <div className="form-input-field">
+                      <Field id="loginGuideStepTwo" name="loginGuideStepTwo" type="text" />
+                    </div>
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label htmlFor="loginGuideStepThree" className="text-label">
+                    {intl.formatMessage(messages.loginGuideStepThree)}
+                  </label>
+                  <div className="form-input-area">
+                    <div className="form-input-field">
+                      <Field
+                        id="loginGuideStepThree"
+                        name="loginGuideStepThree"
+                        type="text"
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="actions">

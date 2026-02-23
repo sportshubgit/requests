@@ -49,6 +49,13 @@ export interface PublicSettingsResponse {
   emailEnabled: boolean;
   newPlexLogin: boolean;
   youtubeUrl: string;
+  loginGuideEnabled: boolean;
+  loginGuideShowOnce: boolean;
+  loginGuideTitle: string;
+  loginGuideBody: string;
+  loginGuideStepOne: string;
+  loginGuideStepTwo: string;
+  loginGuideStepThree: string;
 }
 
 export interface CacheItem {

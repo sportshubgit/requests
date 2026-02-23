@@ -153,6 +153,13 @@ export interface MainSettings {
   enableSpecialEpisodes: boolean;
   locale: string;
   youtubeUrl: string;
+  loginGuideEnabled: boolean;
+  loginGuideShowOnce: boolean;
+  loginGuideTitle: string;
+  loginGuideBody: string;
+  loginGuideStepOne: string;
+  loginGuideStepTwo: string;
+  loginGuideStepThree: string;
 }
 
 export interface ProxySettings {
@@ -211,6 +218,13 @@ interface FullPublicSettings extends PublicSettings {
   userEmailRequired: boolean;
   newPlexLogin: boolean;
   youtubeUrl: string;
+  loginGuideEnabled: boolean;
+  loginGuideShowOnce: boolean;
+  loginGuideTitle: string;
+  loginGuideBody: string;
+  loginGuideStepOne: string;
+  loginGuideStepTwo: string;
+  loginGuideStepThree: string;
 }
 
 export interface NotificationAgentConfig {
@@ -429,6 +443,17 @@ class Settings {
         enableSpecialEpisodes: false,
         locale: 'en',
         youtubeUrl: '',
+        loginGuideEnabled: true,
+        loginGuideShowOnce: true,
+        loginGuideTitle: 'Welcome to SportsHub',
+        loginGuideBody:
+          'Use SportsHub to request movies and series, and save titles to My List.',
+        loginGuideStepOne:
+          'Add titles to My List from any movie or series page.',
+        loginGuideStepTwo:
+          'If a title is missing, request it and SportsHub will process it for you.',
+        loginGuideStepThree:
+          'When new content is ready, refresh your playlist in your player app to see it.',
       },
       plex: {
         name: '',
@@ -742,6 +767,13 @@ class Settings {
         this.data.notifications.agents.email.options.userEmailRequired,
       newPlexLogin: this.data.main.newPlexLogin,
       youtubeUrl: this.data.main.youtubeUrl,
+      loginGuideEnabled: this.data.main.loginGuideEnabled,
+      loginGuideShowOnce: this.data.main.loginGuideShowOnce,
+      loginGuideTitle: this.data.main.loginGuideTitle,
+      loginGuideBody: this.data.main.loginGuideBody,
+      loginGuideStepOne: this.data.main.loginGuideStepOne,
+      loginGuideStepTwo: this.data.main.loginGuideStepTwo,
+      loginGuideStepThree: this.data.main.loginGuideStepThree,
     };
   }
 

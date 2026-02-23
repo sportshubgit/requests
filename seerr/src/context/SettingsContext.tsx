@@ -32,6 +32,16 @@ const defaultSettings = {
   emailEnabled: false,
   newPlexLogin: true,
   youtubeUrl: '',
+  loginGuideEnabled: true,
+  loginGuideShowOnce: true,
+  loginGuideTitle: 'Welcome to SportsHub',
+  loginGuideBody:
+    'Use SportsHub to request movies and series, and save titles to My List.',
+  loginGuideStepOne: 'Add titles to My List from any movie or series page.',
+  loginGuideStepTwo:
+    'If a title is missing, request it and SportsHub will process it for you.',
+  loginGuideStepThree:
+    'When new content is ready, refresh your playlist in your player app to see it.',
 };
 
 export const SettingsContext = React.createContext<SettingsContextProps>({

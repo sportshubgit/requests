@@ -3,9 +3,10 @@ import {
   NotFoundError,
   Watchlist,
 } from '@server/entity/Watchlist';
+import { getRepository } from '@server/datasource';
 import logger from '@server/logger';
 import { Router } from 'express';
-import { getRepository, QueryFailedError } from 'typeorm';
+import { QueryFailedError } from 'typeorm';
 
 import { watchlistCreate, watchlistUpdate } from '@server/interfaces/api/watchlistCreate';
 import {
