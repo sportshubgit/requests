@@ -19,6 +19,25 @@ export class IssueSubscriber implements EntitySubscriberInterface<Issue> {
     return Issue;
   }
 
+  private shouldNotifyIssueOwner(entity: Issue, type: Notification): boolean {
+    if (entity.createdBy.hasPermission(Permission.MANAGE_ISSUES)) {
+      return false;
+    }
+
+    if (type === Notification.ISSUE_CREATED) {
+      return true;
+    }
+
+    if (
+      type === Notification.ISSUE_RESOLVED ||
+      type === Notification.ISSUE_REOPENED
+    ) {
+      return entity.modifiedBy?.id !== entity.createdBy.id;
+    }
+
+    return false;
+  }
+
   private async sendIssueNotification(entity: Issue, type: Notification) {
     let title: string;
     let image: string;
@@ -85,13 +104,9 @@ export class IssueSubscriber implements EntitySubscriberInterface<Issue> {
         extra,
         notifyAdmin: true,
         notifySystem: true,
-        notifyUser:
-          !entity.createdBy.hasPermission(Permission.MANAGE_ISSUES) &&
-          entity.modifiedBy?.id !== entity.createdBy.id &&
-          (type === Notification.ISSUE_RESOLVED ||
-            type === Notification.ISSUE_REOPENED)
-            ? entity.createdBy
-            : undefined,
+        notifyUser: this.shouldNotifyIssueOwner(entity, type)
+          ? entity.createdBy
+          : undefined,
       });
     } catch (e) {
       logger.error('Something went wrong sending issue notification(s)', {

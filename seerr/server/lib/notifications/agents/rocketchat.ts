@@ -23,6 +23,9 @@ class RocketChatAgent
   extends BaseAgent<NotificationAgentRocketChat>
   implements NotificationAgent
 {
+  private readonly automatedFooter =
+    "This is an automated message and replies will not be seen. If you have a query, please message in 'Plex Requests & Plex Issues'.";
+
   protected getSettings(): NotificationAgentRocketChat {
     if (this.settings) {
       return this.settings;
@@ -89,7 +92,7 @@ class RocketChatAgent
         message += `\nRequest Status: ${status}`;
       }
     } else if (payload.comment) {
-      message += `\n\nComment from ${payload.comment.user.displayName}: ${payload.comment.message}`;
+      message += `\n\nComment: ${payload.comment.message}`;
     } else if (payload.issue) {
       message += `\n\nReported By: ${payload.issue.createdBy.displayName}`;
       message += `\nIssue Type: ${IssueTypeName[payload.issue.issueType]}`;
@@ -100,6 +103,11 @@ class RocketChatAgent
 
     for (const extra of payload.extra ?? []) {
       message += `\n${extra.name}: ${extra.value}`;
+    }
+
+    if (type === Notification.MEDIA_AVAILABLE) {
+      message +=
+        '\n\nThis content will be available in your apps after the next content scan.';
     }
 
     const url = applicationUrl
@@ -115,6 +123,8 @@ class RocketChatAgent
         payload.issue ? 'Issue' : 'Media'
       } in ${applicationTitle}: ${url}`;
     }
+
+    message += `\n\n${this.automatedFooter}`;
 
     return message;
   }
@@ -163,15 +173,52 @@ class RocketChatAgent
     }
   }
 
-  private getUsername(user?: User): string | null {
+  private getUsernames(user?: User): string[] {
     if (!user) {
-      return null;
+      return [];
     }
 
-    const username =
-      user.username || user.plexUsername || user.jellyfinUsername || '';
+    const candidates = [
+      user.username,
+      user.plexUsername,
+      user.jellyfinUsername,
+      user.displayName,
+      user.email?.split('@')[0],
+    ]
+      .map((candidate) => candidate?.trim() ?? '')
+      .filter((candidate) => !!candidate);
 
-    return username.trim() ? username.trim() : null;
+    return [...new Set(candidates)];
+  }
+
+  private isIssueNotification(type: Notification): boolean {
+    return (
+      type === Notification.ISSUE_CREATED ||
+      type === Notification.ISSUE_COMMENT ||
+      type === Notification.ISSUE_RESOLVED ||
+      type === Notification.ISSUE_REOPENED
+    );
+  }
+
+  private shouldSendToUser(type: Notification, payload: NotificationPayload): boolean {
+    if (!payload.notifyUser) {
+      return false;
+    }
+
+    if (!payload.notifyUser.settings) {
+      return true;
+    }
+
+    // Keep issue reporting reliable even when older user notification bitmasks
+    // are stale or missing issue flags.
+    if (this.isIssueNotification(type)) {
+      return true;
+    }
+
+    return payload.notifyUser.settings.hasNotificationType(
+      NotificationAgentKey.ROCKETCHAT,
+      type
+    );
   }
 
   public async send(
@@ -202,27 +249,25 @@ class RocketChatAgent
       }
     }
 
-    if (
-      payload.notifyUser &&
-      (!payload.notifyUser.settings ||
-        payload.notifyUser.settings.hasNotificationType(
-          NotificationAgentKey.ROCKETCHAT,
-          type
-        ))
-    ) {
-      const username = this.getUsername(payload.notifyUser);
-      if (username) {
+    if (this.shouldSendToUser(type, payload)) {
+      const usernames = this.getUsernames(payload.notifyUser);
+      if (usernames.length > 0) {
         logger.debug('Sending Rocket.Chat notification', {
           label: 'Notifications',
           recipient: payload.notifyUser.displayName,
           type: Notification[type],
           subject: payload.subject,
+          usernames,
         });
 
-        const sent = await this.postMessage(
-          this.normalizeChannel(username),
-          message
-        );
+        let sent = false;
+        for (const username of usernames) {
+          sent = await this.postMessage(this.normalizeChannel(username), message);
+          if (sent) {
+            break;
+          }
+        }
+
         if (!sent) {
           return false;
         }
@@ -238,8 +283,8 @@ class RocketChatAgent
           u.settings?.hasNotificationType(NotificationAgentKey.ROCKETCHAT, type) &&
           shouldSendAdminNotification(type, u, payload)
       )) {
-        const username = this.getUsername(user);
-        if (!username) {
+        const usernames = this.getUsernames(user);
+        if (usernames.length === 0) {
           continue;
         }
 
@@ -248,9 +293,17 @@ class RocketChatAgent
           recipient: user.displayName,
           type: Notification[type],
           subject: payload.subject,
+          usernames,
         });
 
-        const sent = await this.postMessage(this.normalizeChannel(username), message);
+        let sent = false;
+        for (const username of usernames) {
+          sent = await this.postMessage(this.normalizeChannel(username), message);
+          if (sent) {
+            break;
+          }
+        }
+
         if (!sent) {
           return false;
         }
