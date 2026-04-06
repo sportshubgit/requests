@@ -112,9 +112,9 @@ class TelegramAgent
         message += `\n\*Request Status:\* ${status}`;
       }
     } else if (payload.comment) {
-      message += `\n\n\*Comment from ${this.escapeText(
-        payload.comment.user.displayName
-      )}:\* ${this.escapeText(payload.comment.message)}`;
+      message += `\n\n\*Comment from admin:\* ${this.escapeText(
+        payload.comment.message
+      )}`;
     } else if (payload.issue) {
       message += `\n\n\*Reported By:\* ${this.escapeText(
         payload.issue.createdBy.displayName
@@ -127,6 +127,12 @@ class TelegramAgent
 
     for (const extra of payload.extra ?? []) {
       message += `\n\*${extra.name}:\* ${extra.value}`;
+    }
+
+    if (type === Notification.MEDIA_AVAILABLE) {
+      message += `\n\n${this.escapeText(
+        'This content will be available in your apps after the next content scan.'
+      )}`;
     }
 
     const url = applicationUrl
