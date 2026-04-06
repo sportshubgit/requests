@@ -19,6 +19,11 @@ interface RocketChatPayload {
   text: string;
 }
 
+interface RocketChatRoomPayload {
+  roomId: string;
+  text: string;
+}
+
 class RocketChatAgent
   extends BaseAgent<NotificationAgentRocketChat>
   implements NotificationAgent
@@ -144,6 +149,10 @@ class RocketChatAgent
   private async postMessage(channel: string, text: string): Promise<boolean> {
     const settings = this.getSettings();
     const serverUrl = settings.options.serverUrl.replace(/\/+$/, '');
+    const headers = {
+      'X-Auth-Token': settings.options.authToken,
+      'X-User-Id': settings.options.userId,
+    };
 
     try {
       await axios.post<RocketChatPayload>(
@@ -153,15 +162,53 @@ class RocketChatAgent
           text,
         },
         {
-          headers: {
-            'X-Auth-Token': settings.options.authToken,
-            'X-User-Id': settings.options.userId,
-          },
+          headers,
         }
       );
 
       return true;
     } catch (e) {
+      const errorType = e?.response?.data?.errorType;
+      if (channel.startsWith('@') && errorType === 'invalid-channel') {
+        const username = channel.slice(1);
+        const roomId = await this.ensureDirectRoom(serverUrl, headers, username);
+
+        if (roomId) {
+          try {
+            await axios.post<RocketChatRoomPayload>(
+              `${serverUrl}/api/v1/chat.postMessage`,
+              {
+                roomId,
+                text,
+              },
+              { headers }
+            );
+
+            logger.debug(
+              'Recovered Rocket.Chat delivery via direct room fallback',
+              {
+                label: 'Notifications',
+                username,
+                roomId,
+              }
+            );
+
+            return true;
+          } catch (roomError) {
+            logger.error(
+              'Rocket.Chat direct room fallback failed',
+              {
+                label: 'Notifications',
+                username,
+                roomId,
+                errorMessage: roomError.message,
+                response: roomError?.response?.data,
+              }
+            );
+          }
+        }
+      }
+
       logger.error('Error sending Rocket.Chat notification', {
         label: 'Notifications',
         channel,
@@ -170,6 +217,63 @@ class RocketChatAgent
       });
 
       return false;
+    }
+  }
+
+  private async ensureDirectRoom(
+    serverUrl: string,
+    headers: { 'X-Auth-Token': string; 'X-User-Id': string },
+    username: string
+  ): Promise<string | null> {
+    const normalizedUsername = username.replace(/^@+/, '').trim();
+    if (!normalizedUsername) {
+      return null;
+    }
+
+    try {
+      const byUsername = await axios.post(
+        `${serverUrl}/api/v1/im.create`,
+        { username: normalizedUsername },
+        { headers }
+      );
+
+      const roomId =
+        byUsername?.data?.room?._id ??
+        byUsername?.data?.room?.rid ??
+        byUsername?.data?._id ??
+        byUsername?.data?.rid ??
+        null;
+
+      if (roomId) {
+        return roomId;
+      }
+    } catch (_e) {
+      // Try alternate payload shape below.
+    }
+
+    try {
+      const byUsernames = await axios.post(
+        `${serverUrl}/api/v1/im.create`,
+        { usernames: [normalizedUsername] },
+        { headers }
+      );
+
+      return (
+        byUsernames?.data?.room?._id ??
+        byUsernames?.data?.room?.rid ??
+        byUsernames?.data?._id ??
+        byUsernames?.data?.rid ??
+        null
+      );
+    } catch (e) {
+      logger.debug('Rocket.Chat im.create failed', {
+        label: 'Notifications',
+        username: normalizedUsername,
+        errorMessage: e.message,
+        response: e?.response?.data,
+      });
+
+      return null;
     }
   }
 
@@ -187,8 +291,18 @@ class RocketChatAgent
     ]
       .map((candidate) => candidate?.trim() ?? '')
       .filter((candidate) => !!candidate);
+    const expanded = candidates.flatMap((candidate) => {
+      const lower = candidate.toLowerCase();
+      const compact = lower.replace(/\s+/g, '');
 
-    return [...new Set(candidates)];
+      return compact && compact !== candidate
+        ? [candidate, lower, compact]
+        : lower !== candidate
+          ? [candidate, lower]
+          : [candidate];
+    });
+
+    return [...new Set(expanded)];
   }
 
   private isIssueNotification(type: Notification): boolean {
