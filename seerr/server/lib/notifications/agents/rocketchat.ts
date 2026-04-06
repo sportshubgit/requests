@@ -250,11 +250,16 @@ class RocketChatAgent
     }
 
     if (this.shouldSendToUser(type, payload)) {
-      const usernames = this.getUsernames(payload.notifyUser);
+      const notifyUser = payload.notifyUser;
+      if (!notifyUser) {
+        return true;
+      }
+
+      const usernames = this.getUsernames(notifyUser);
       if (usernames.length > 0) {
         logger.debug('Sending Rocket.Chat notification', {
           label: 'Notifications',
-          recipient: payload.notifyUser.displayName,
+          recipient: notifyUser.displayName,
           type: Notification[type],
           subject: payload.subject,
           usernames,

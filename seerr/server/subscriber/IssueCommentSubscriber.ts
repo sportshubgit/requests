@@ -19,8 +19,8 @@ export class IssueCommentSubscriber implements EntitySubscriberInterface<IssueCo
   }
 
   private async sendIssueCommentNotification(entity: IssueComment) {
-    let title: string;
-    let image: string;
+    let title = 'Issue Update';
+    let image: string | undefined;
     const tmdb = new TheMovieDb();
 
     try {
@@ -33,26 +33,50 @@ export class IssueCommentSubscriber implements EntitySubscriberInterface<IssueCo
 
       const createdBy = await getRepository(User).findOneOrFail({
         where: { id: issue.createdBy.id },
+        relations: { settings: true },
       });
 
       const media = await getRepository(Media).findOneOrFail({
         where: { id: issue.media.id },
       });
 
-      if (media.mediaType === MediaType.MOVIE) {
-        const movie = await tmdb.getMovie({ movieId: media.tmdbId });
+      title =
+        media.mediaType === MediaType.MOVIE
+          ? `Movie (${media.tmdbId})`
+          : `Series (${media.tmdbId})`;
 
-        title = `${movie.title}${
-          movie.release_date ? ` (${movie.release_date.slice(0, 4)})` : ''
-        }`;
-        image = `https://image.tmdb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`;
-      } else {
-        const tvshow = await tmdb.getTvShow({ tvId: media.tmdbId });
+      try {
+        if (media.mediaType === MediaType.MOVIE) {
+          const movie = await tmdb.getMovie({ movieId: media.tmdbId });
 
-        title = `${tvshow.name}${
-          tvshow.first_air_date ? ` (${tvshow.first_air_date.slice(0, 4)})` : ''
-        }`;
-        image = `https://image.tmdb.org/t/p/w600_and_h900_bestv2${tvshow.poster_path}`;
+          title = `${movie.title}${
+            movie.release_date ? ` (${movie.release_date.slice(0, 4)})` : ''
+          }`;
+          if (movie.poster_path) {
+            image = `https://image.tmdb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`;
+          }
+        } else {
+          const tvshow = await tmdb.getTvShow({ tvId: media.tmdbId });
+
+          title = `${tvshow.name}${
+            tvshow.first_air_date ? ` (${tvshow.first_air_date.slice(0, 4)})` : ''
+          }`;
+          if (tvshow.poster_path) {
+            image = `https://image.tmdb.org/t/p/w600_and_h900_bestv2${tvshow.poster_path}`;
+          }
+        }
+      } catch (tmdbError) {
+        logger.warn(
+          'Issue comment notification TMDB lookup failed, using fallback',
+          {
+            label: 'Notifications',
+            commentId: entity.id,
+            issueId: issue.id,
+            mediaType: media.mediaType,
+            tmdbId: media.tmdbId,
+            errorMessage: tmdbError.message,
+          }
+        );
       }
 
       const [firstComment] = sortBy(issue.comments, 'id');

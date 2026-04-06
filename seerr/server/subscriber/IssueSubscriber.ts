@@ -1,7 +1,9 @@
 import TheMovieDb from '@server/api/themoviedb';
 import { IssueStatus, IssueType, IssueTypeName } from '@server/constants/issue';
 import { MediaType } from '@server/constants/media';
+import { getRepository } from '@server/datasource';
 import Issue from '@server/entity/Issue';
+import { User } from '@server/entity/User';
 import notificationManager, { Notification } from '@server/lib/notifications';
 import { Permission } from '@server/lib/permissions';
 import logger from '@server/logger';
@@ -39,26 +41,49 @@ export class IssueSubscriber implements EntitySubscriberInterface<Issue> {
   }
 
   private async sendIssueNotification(entity: Issue, type: Notification) {
-    let title: string;
-    let image: string;
+    let title =
+      entity.media.mediaType === MediaType.MOVIE
+        ? `Movie (${entity.media.tmdbId})`
+        : `Series (${entity.media.tmdbId})`;
+    let image: string | undefined;
     const tmdb = new TheMovieDb();
 
     try {
-      if (entity.media.mediaType === MediaType.MOVIE) {
-        const movie = await tmdb.getMovie({ movieId: entity.media.tmdbId });
+      try {
+        if (entity.media.mediaType === MediaType.MOVIE) {
+          const movie = await tmdb.getMovie({ movieId: entity.media.tmdbId });
 
-        title = `${movie.title}${
-          movie.release_date ? ` (${movie.release_date.slice(0, 4)})` : ''
-        }`;
-        image = `https://image.tmdb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`;
-      } else {
-        const tvshow = await tmdb.getTvShow({ tvId: entity.media.tmdbId });
+          title = `${movie.title}${
+            movie.release_date ? ` (${movie.release_date.slice(0, 4)})` : ''
+          }`;
+          if (movie.poster_path) {
+            image = `https://image.tmdb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`;
+          }
+        } else {
+          const tvshow = await tmdb.getTvShow({ tvId: entity.media.tmdbId });
 
-        title = `${tvshow.name}${
-          tvshow.first_air_date ? ` (${tvshow.first_air_date.slice(0, 4)})` : ''
-        }`;
-        image = `https://image.tmdb.org/t/p/w600_and_h900_bestv2${tvshow.poster_path}`;
+          title = `${tvshow.name}${
+            tvshow.first_air_date ? ` (${tvshow.first_air_date.slice(0, 4)})` : ''
+          }`;
+          if (tvshow.poster_path) {
+            image = `https://image.tmdb.org/t/p/w600_and_h900_bestv2${tvshow.poster_path}`;
+          }
+        }
+      } catch (tmdbError) {
+        logger.warn('Issue notification TMDB lookup failed, using fallback', {
+          label: 'Notifications',
+          issueId: entity.id,
+          mediaType: entity.media.mediaType,
+          tmdbId: entity.media.tmdbId,
+          errorMessage: tmdbError.message,
+        });
       }
+
+      const createdBy =
+        (await getRepository(User).findOne({
+          where: { id: entity.createdBy.id },
+          relations: { settings: true },
+        })) ?? entity.createdBy;
 
       const [firstComment] = sortBy(entity.comments, 'id');
       const extra: { name: string; value: string }[] = [];
@@ -97,16 +122,14 @@ export class IssueSubscriber implements EntitySubscriberInterface<Issue> {
                     : ''
                 }Issue Reopened`,
         subject: title,
-        message: firstComment.message,
+        message: firstComment?.message ?? '',
         issue: entity,
         media: entity.media,
         image,
         extra,
         notifyAdmin: true,
         notifySystem: true,
-        notifyUser: this.shouldNotifyIssueOwner(entity, type)
-          ? entity.createdBy
-          : undefined,
+        notifyUser: this.shouldNotifyIssueOwner(entity, type) ? createdBy : undefined,
       });
     } catch (e) {
       logger.error('Something went wrong sending issue notification(s)', {
