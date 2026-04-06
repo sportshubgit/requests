@@ -221,6 +221,18 @@ class RocketChatAgent
     );
   }
 
+  private shouldSendToAdmin(type: Notification, user: User): boolean {
+    if (!user.settings) {
+      return this.isIssueNotification(type);
+    }
+
+    if (this.isIssueNotification(type)) {
+      return true;
+    }
+
+    return user.settings.hasNotificationType(NotificationAgentKey.ROCKETCHAT, type);
+  }
+
   public async send(
     type: Notification,
     payload: NotificationPayload
@@ -285,7 +297,7 @@ class RocketChatAgent
 
       for (const user of users.filter(
         (u) =>
-          u.settings?.hasNotificationType(NotificationAgentKey.ROCKETCHAT, type) &&
+          this.shouldSendToAdmin(type, u) &&
           shouldSendAdminNotification(type, u, payload)
       )) {
         const usernames = this.getUsernames(user);
