@@ -337,14 +337,25 @@ class RocketChatAgent
 
   private shouldSendToAdmin(type: Notification, user: User): boolean {
     if (!user.settings) {
-      return this.isIssueNotification(type);
-    }
-
-    if (this.isIssueNotification(type)) {
-      return true;
+      return false;
     }
 
     return user.settings.hasNotificationType(NotificationAgentKey.ROCKETCHAT, type);
+  }
+
+  private async getIssueReporter(payload: NotificationPayload): Promise<User | undefined> {
+    const reporterId = payload.issue?.createdBy?.id ?? payload.notifyUser?.id;
+
+    if (!reporterId) {
+      return payload.issue?.createdBy ?? payload.notifyUser ?? undefined;
+    }
+
+    const user = await getRepository(User).findOne({
+      where: { id: reporterId },
+      relations: { settings: true },
+    });
+
+    return user ?? payload.issue?.createdBy ?? payload.notifyUser ?? undefined;
   }
 
   public async send(
@@ -353,6 +364,51 @@ class RocketChatAgent
   ): Promise<boolean> {
     const settings = this.getSettings();
     const message = this.buildMessage(type, payload);
+
+    if (this.isIssueNotification(type)) {
+      const reporter = await this.getIssueReporter(payload);
+
+      if (!reporter) {
+        logger.warn('Skipping Rocket.Chat issue notification, no reporter found', {
+          label: 'Notifications',
+          type: Notification[type],
+          subject: payload.subject,
+          issueId: payload.issue?.id,
+        });
+
+        return true;
+      }
+
+      const usernames = this.getUsernames(reporter);
+      if (usernames.length === 0) {
+        logger.warn('Skipping Rocket.Chat issue notification, no reporter username', {
+          label: 'Notifications',
+          type: Notification[type],
+          subject: payload.subject,
+          issueId: payload.issue?.id,
+          reporterId: reporter.id,
+        });
+
+        return true;
+      }
+
+      logger.debug('Sending Rocket.Chat issue notification to reporter only', {
+        label: 'Notifications',
+        recipient: reporter.displayName,
+        type: Notification[type],
+        subject: payload.subject,
+        usernames,
+      });
+
+      for (const username of usernames) {
+        const sent = await this.postMessage(this.normalizeChannel(username), message);
+        if (sent) {
+          return true;
+        }
+      }
+
+      return false;
+    }
 
     if (
       payload.notifySystem &&
