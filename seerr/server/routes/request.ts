@@ -1,5 +1,6 @@
 import RadarrAPI from '@server/api/servarr/radarr';
 import SonarrAPI from '@server/api/servarr/sonarr';
+import TheMovieDb from '@server/api/themoviedb';
 import {
   MediaRequestStatus,
   MediaStatus,
@@ -16,11 +17,19 @@ import {
   QuotaRestrictedError,
   RequestPermissionError,
 } from '@server/entity/MediaRequest';
+import { DuplicateWatchlistRequestError, Watchlist } from '@server/entity/Watchlist';
+import {
+  getTodayDateString,
+  getUSMovieReleaseDate,
+  isAtLeastOneYearOld,
+  isReleasedOnOrBefore,
+} from '@server/lib/usReleaseDate';
 import {
   buildTrackedExternalIds,
   buildTrackedSyncUser,
   pushTrackedSyncEvent,
 } from '@server/lib/trackedSync';
+import { getLiveAvailability } from '@server/lib/liveAvailability';
 import { getSettings } from '@server/lib/settings';
 import SeasonRequest from '@server/entity/SeasonRequest';
 import { User } from '@server/entity/User';
@@ -34,6 +43,34 @@ import { isAuthenticated } from '@server/middleware/auth';
 import { Router } from 'express';
 
 const requestRoutes = Router();
+
+requestRoutes.get(
+  '/availability/:mediaType/:tmdbId',
+  async (req, res, next) => {
+    try {
+      const mediaTypeParam = String(req.params.mediaType).toLowerCase();
+      const mediaType =
+        mediaTypeParam === 'movie' ? MediaType.MOVIE : MediaType.TV;
+      const tmdbId = Number(req.params.tmdbId);
+
+      if (!Number.isFinite(tmdbId) || tmdbId <= 0) {
+        return next({ status: 400, message: 'Invalid tmdbId.' });
+      }
+
+      const tvdbId = req.query.tvdbId ? Number(req.query.tvdbId) : undefined;
+      const live = await getLiveAvailability({
+        mediaType,
+        tmdbId,
+        tvdbId,
+        username: req.user?.username,
+      });
+
+      return res.status(200).json(live);
+    } catch (e) {
+      return next({ status: 500, message: e.message });
+    }
+  }
+);
 
 requestRoutes.get<Record<string, unknown>, RequestResultsResponse>(
   '/',
@@ -316,29 +353,125 @@ requestRoutes.post<never, MediaRequest, MediaRequestBody>(
           message: 'You must be logged in to request media.',
         });
       }
+
+      const tmdb = new TheMovieDb();
+      const today = getTodayDateString();
+      if (req.body.mediaType === MediaType.MOVIE) {
+        const movie = await tmdb.getMovie({
+          movieId: req.body.mediaId,
+        });
+        const usReleaseDate = getUSMovieReleaseDate(movie.release_dates);
+        const fallbackReleasedDate = isAtLeastOneYearOld(
+          movie.release_date,
+          today
+        )
+          ? movie.release_date
+          : undefined;
+        const effectiveReleaseDate = usReleaseDate ?? fallbackReleasedDate;
+
+        if (!isReleasedOnOrBefore(effectiveReleaseDate, today)) {
+          return next({
+            status: 403,
+            message:
+              'Requests for unreleased titles are disabled until release date.',
+          });
+        }
+      } else {
+        const series = await tmdb.getTvShow({
+          tvId: req.body.mediaId,
+        });
+
+        if (!isReleasedOnOrBefore(series.first_air_date, today)) {
+          return next({
+            status: 403,
+            message:
+              'Requests for unreleased titles are disabled until release date.',
+          });
+        }
+      }
+
+      const liveAvailability = await getLiveAvailability({
+        mediaType: req.body.mediaType,
+        tmdbId: req.body.mediaId,
+        tvdbId: req.body.tvdbId,
+        username: req.user.username,
+      });
+
+      if (req.body.mediaType === MediaType.MOVIE) {
+        if (liveAvailability.available || liveAvailability.tracked) {
+          throw new MediaAlreadyAvailableError(
+            liveAvailability.available
+              ? MediaStatus.AVAILABLE
+              : MediaStatus.PROCESSING
+          );
+        }
+      } else {
+        const allSeasonsRequested =
+          !req.body.seasons || req.body.seasons === 'all';
+        if (
+          allSeasonsRequested &&
+          (liveAvailability.available || liveAvailability.tracked)
+        ) {
+          throw new MediaAlreadyAvailableError(
+            liveAvailability.available
+              ? MediaStatus.AVAILABLE
+              : MediaStatus.PROCESSING
+          );
+        }
+      }
+
       const request = await MediaRequest.request(req.body, req.user);
 
       const trackedSettings = getSettings().main;
-      await pushTrackedSyncEvent({
-        event: 'request_created',
-        category: trackedSettings.trackedSyncCategory || 'tracked',
-        tmdbId: request.media.tmdbId,
-        mediaType: request.type,
-        watched: false,
-        requestedBy: buildTrackedSyncUser(request.requestedBy),
-        externalIds: buildTrackedExternalIds({
-          tmdbId: request.media.tmdbId,
-          imdbId: request.media.imdbId,
-          tvdbId: request.media.tvdbId,
-        }),
-        metadata: {
-          requestId: request.id,
-          requestStatus: request.status,
-          is4k: request.is4k,
-          mediaStatus: request.media.status,
-          mediaStatus4k: request.media.status4k,
-        },
-      });
+      // Source of truth is Watchlist: requests should auto-populate it.
+      try {
+        const watchlistItem = await Watchlist.createWatchlist({
+          watchlistRequest: {
+            mediaType: request.type,
+            tmdbId: request.media.tmdbId,
+          },
+          user: request.requestedBy,
+        });
+
+        await pushTrackedSyncEvent({
+          event: 'watchlist_added',
+          category:
+            watchlistItem.customCategory ??
+            trackedSettings.trackedSyncCategory ??
+            'tracked',
+          tmdbId: watchlistItem.tmdbId,
+          mediaType: watchlistItem.mediaType,
+          title: watchlistItem.title,
+          watched: watchlistItem.watched,
+          requestedBy: buildTrackedSyncUser(request.requestedBy),
+          externalIds: buildTrackedExternalIds({
+            tmdbId: request.media.tmdbId,
+            imdbId: request.media.imdbId,
+            tvdbId: request.media.tvdbId,
+          }),
+          metadata: {
+            requestId: request.id,
+            requestStatus: request.status,
+            is4k: request.is4k,
+            watchedAt: watchlistItem.watchedAt ?? null,
+            mediaStatus: request.media.status,
+            mediaStatus4k: request.media.status4k,
+          },
+        });
+      } catch (watchlistError) {
+        if (!(watchlistError instanceof DuplicateWatchlistRequestError)) {
+          logger.error('Failed to auto-add request to watchlist', {
+            label: 'Watchlist',
+            tmdbId: request.media.tmdbId,
+            mediaType: request.type,
+            requestedBy: request.requestedBy?.id,
+            errorMessage:
+              watchlistError instanceof Error
+                ? watchlistError.message
+                : 'Unknown error',
+          });
+        }
+      }
 
       return res.status(201).json(request);
     } catch (error) {

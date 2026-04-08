@@ -2,9 +2,16 @@ import IMDBRadarrProxy from '@server/api/rating/imdbRadarrProxy';
 import RottenTomatoes from '@server/api/rating/rottentomatoes';
 import { type RatingResponse } from '@server/api/ratings';
 import TheMovieDb from '@server/api/themoviedb';
-import { MediaType } from '@server/constants/media';
+import { MediaStatus, MediaType } from '@server/constants/media';
 import { getRepository } from '@server/datasource';
 import Media from '@server/entity/Media';
+import { getLiveAvailability } from '@server/lib/liveAvailability';
+import {
+  getTodayDateString,
+  getUSMovieReleaseDate,
+  isAtLeastOneYearOld,
+  isReleasedOnOrBefore,
+} from '@server/lib/usReleaseDate';
 import { Watchlist } from '@server/entity/Watchlist';
 import logger from '@server/logger';
 import { mapMovieDetails } from '@server/models/Movie';
@@ -22,7 +29,62 @@ movieRoutes.get('/:id', async (req, res, next) => {
       language: (req.query.language as string) ?? req.locale,
     });
 
+    const today = getTodayDateString();
+    const usReleaseDate = getUSMovieReleaseDate(tmdbMovie.release_dates);
+    const fallbackReleasedDate = isAtLeastOneYearOld(
+      tmdbMovie.release_date,
+      today
+    )
+      ? tmdbMovie.release_date
+      : undefined;
+    const effectiveReleaseDate = usReleaseDate ?? fallbackReleasedDate;
+
+    if (!isReleasedOnOrBefore(effectiveReleaseDate, today)) {
+      return next({
+        status: 404,
+        message: 'Movie not found.',
+      });
+    }
+
+    if (effectiveReleaseDate) {
+      tmdbMovie.release_date = effectiveReleaseDate;
+    }
+
     const media = await Media.getMedia(tmdbMovie.id, MediaType.MOVIE);
+    const liveAvailability = await getLiveAvailability({
+      mediaType: MediaType.MOVIE,
+      tmdbId: tmdbMovie.id,
+      username: req.user?.username,
+    });
+
+    let mediaForUi = media;
+    if (!mediaForUi && (liveAvailability.tracked || liveAvailability.available)) {
+      mediaForUi = new Media({
+        mediaType: MediaType.MOVIE,
+        tmdbId: tmdbMovie.id,
+        status: MediaStatus.UNKNOWN,
+        status4k: MediaStatus.UNKNOWN,
+      });
+    }
+    if (mediaForUi) {
+      if (liveAvailability.available) {
+        mediaForUi.status = MediaStatus.AVAILABLE;
+      } else if (
+        liveAvailability.tracked &&
+        mediaForUi.status !== MediaStatus.AVAILABLE
+      ) {
+        mediaForUi.status = MediaStatus.PROCESSING;
+      }
+
+      if (liveAvailability.available4k) {
+        mediaForUi.status4k = MediaStatus.AVAILABLE;
+      } else if (
+        liveAvailability.tracked4k &&
+        mediaForUi.status4k !== MediaStatus.AVAILABLE
+      ) {
+        mediaForUi.status4k = MediaStatus.PROCESSING;
+      }
+    }
 
     const onUserWatchlist = await getRepository(Watchlist).exist({
       where: {
@@ -33,7 +95,7 @@ movieRoutes.get('/:id', async (req, res, next) => {
       },
     });
 
-    const data = mapMovieDetails(tmdbMovie, media, onUserWatchlist);
+    const data = mapMovieDetails(tmdbMovie, mediaForUi, onUserWatchlist);
 
     // TMDB issue where it doesnt fallback to English when no overview is available in requested locale.
     if (!data.overview) {
@@ -65,16 +127,20 @@ movieRoutes.get('/:id/recommendations', async (req, res, next) => {
       language: (req.query.language as string) ?? req.locale,
     });
 
+    const releasedResults = results.results.filter((result) =>
+      isReleasedOnOrBefore(result.release_date, getTodayDateString())
+    );
+
     const media = await Media.getRelatedMedia(
       req.user,
-      results.results.map((result) => result.id)
+      releasedResults.map((result) => result.id)
     );
 
     return res.status(200).json({
       page: results.page,
       totalPages: results.total_pages,
-      totalResults: results.total_results,
-      results: results.results.map((result) =>
+      totalResults: releasedResults.length,
+      results: releasedResults.map((result) =>
         mapMovieResult(
           result,
           media.find(
@@ -107,16 +173,20 @@ movieRoutes.get('/:id/similar', async (req, res, next) => {
       language: (req.query.language as string) ?? req.locale,
     });
 
+    const releasedResults = results.results.filter((result) =>
+      isReleasedOnOrBefore(result.release_date, getTodayDateString())
+    );
+
     const media = await Media.getRelatedMedia(
       req.user,
-      results.results.map((result) => result.id)
+      releasedResults.map((result) => result.id)
     );
 
     return res.status(200).json({
       page: results.page,
       totalPages: results.total_pages,
-      totalResults: results.total_results,
-      results: results.results.map((result) =>
+      totalResults: releasedResults.length,
+      results: releasedResults.map((result) =>
         mapMovieResult(
           result,
           media.find(
