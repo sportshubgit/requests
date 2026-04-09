@@ -126,7 +126,9 @@ class TelegramAgent
     }
 
     for (const extra of payload.extra ?? []) {
-      message += `\n\*${extra.name}:\* ${extra.value}`;
+      message += `\n\*${this.escapeText(extra.name)}:\* ${this.escapeText(
+        extra.value
+      )}`;
     }
 
     if (type === Notification.MEDIA_AVAILABLE) {
