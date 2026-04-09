@@ -141,6 +141,28 @@ export class MediaRequest {
       relations: ['requests'],
     });
 
+    // Sonarr can sometimes be keyed on TVDB while Seerr page/request flow is TMDB.
+    // If TMDB lookup misses, reuse existing TV media by TVDB to avoid duplicate rows.
+    if (!media && requestBody.mediaType === MediaType.TV) {
+      const fallbackTvdbId =
+        requestBody.tvdbId ?? tmdbMedia.external_ids.tvdb_id ?? undefined;
+
+      if (fallbackTvdbId) {
+        media = await mediaRepository.findOne({
+          where: {
+            tvdbId: fallbackTvdbId,
+            mediaType: MediaType.TV,
+          },
+          relations: ['requests'],
+        });
+
+        // Keep the media row aligned with current TMDB id when we found it by TVDB.
+        if (media && media.tmdbId !== tmdbMedia.id) {
+          media.tmdbId = tmdbMedia.id;
+        }
+      }
+    }
+
     if (!media) {
       media = new Media({
         tmdbId: tmdbMedia.id,
@@ -794,11 +816,37 @@ export class MediaRequest {
       }
 
       if (entity.type === MediaType.MOVIE) {
-        const movie = await tmdb.getMovie({ movieId: media.tmdbId });
+        let subject = `Movie (TMDB: ${media.tmdbId})`;
+        let message = '';
+        let image: string | undefined;
+
+        try {
+          const movie = await tmdb.getMovie({ movieId: media.tmdbId });
+          subject = `${movie.title}${
+            movie.release_date ? ` (${movie.release_date.slice(0, 4)})` : ''
+          }`;
+          message = truncate(movie.overview, {
+            length: 500,
+            separator: /\s/,
+            omission: '…',
+          });
+          if (movie.poster_path) {
+            image = `https://image.tmdb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`;
+          }
+        } catch (tmdbError) {
+          logger.warn('TMDB lookup failed for movie request notification', {
+            label: 'Notifications',
+            requestId: entity.id,
+            tmdbId: media.tmdbId,
+            errorMessage: tmdbError.message,
+          });
+        }
+
         const extra =
           type === Notification.MEDIA_DECLINED && entity.declineReason
             ? [{ name: 'Decline Reason', value: entity.declineReason }]
             : undefined;
+
         notificationManager.sendNotification(type, {
           media,
           request: entity,
@@ -806,28 +854,51 @@ export class MediaRequest {
           notifySystem,
           notifyUser: notifyUser ? entity.requestedBy : undefined,
           event,
-          subject: `${movie.title}${
-            movie.release_date ? ` (${movie.release_date.slice(0, 4)})` : ''
-          }`,
-          message: truncate(movie.overview, {
+          subject,
+          message,
+          extra,
+          image,
+        });
+      } else if (entity.type === MediaType.TV) {
+        let subject = `Series (TMDB: ${media.tmdbId})`;
+        let message = '';
+        let image: string | undefined;
+
+        try {
+          const tv = await tmdb.getTvShow({ tvId: media.tmdbId });
+          subject = `${tv.name}${
+            tv.first_air_date ? ` (${tv.first_air_date.slice(0, 4)})` : ''
+          }`;
+          message = truncate(tv.overview, {
             length: 500,
             separator: /\s/,
             omission: '…',
-          }),
-          extra,
-          image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`,
-        });
-      } else if (entity.type === MediaType.TV) {
-        const tv = await tmdb.getTvShow({ tvId: media.tmdbId });
+          });
+          if (tv.poster_path) {
+            image = `https://image.tmdb.org/t/p/w600_and_h900_bestv2${tv.poster_path}`;
+          }
+        } catch (tmdbError) {
+          logger.warn('TMDB lookup failed for TV request notification', {
+            label: 'Notifications',
+            requestId: entity.id,
+            tmdbId: media.tmdbId,
+            errorMessage: tmdbError.message,
+          });
+        }
+
+        const requestedSeasons = Array.isArray(entity.seasons)
+          ? entity.seasons.map((season) => season.seasonNumber).join(', ')
+          : '';
         const extra: { name: string; value: string }[] = [
           {
             name: 'Requested Seasons',
-            value: entity.seasons.map((season) => season.seasonNumber).join(', '),
+            value: requestedSeasons || 'All',
           },
         ];
         if (type === Notification.MEDIA_DECLINED && entity.declineReason) {
           extra.push({ name: 'Decline Reason', value: entity.declineReason });
         }
+
         notificationManager.sendNotification(type, {
           media,
           request: entity,
@@ -835,15 +906,9 @@ export class MediaRequest {
           notifySystem,
           notifyUser: notifyUser ? entity.requestedBy : undefined,
           event,
-          subject: `${tv.name}${
-            tv.first_air_date ? ` (${tv.first_air_date.slice(0, 4)})` : ''
-          }`,
-          message: truncate(tv.overview, {
-            length: 500,
-            separator: /\s/,
-            omission: '…',
-          }),
-          image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${tv.poster_path}`,
+          subject,
+          message,
+          image,
           extra,
         });
       }
